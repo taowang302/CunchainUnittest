@@ -11,16 +11,16 @@ import configlog
 class Global:
     def __init__(self):
         self.log = configlog.config_log('../conf/global_config.ini')
-        self.http = ConfigHttp('../conf/global_config.ini',self.log)
+        #self.http = ConfigHttp('../conf/global_config.ini',self.log)
         self.db1 = GetDB('../conf/global_config.ini', 'DATABASE1')
-        #self.db2 = GetDB('../db_config.ini', 'DATABASE2')
+        #self.http = ConfigHttp(self.db1, self.log)
         self.run_mode_config = ConfigRunMode('../conf/global_config.ini')
     
     def get_log(self):
         return self.log
 
-    def get_http(self):
-        return self.http
+    def get_http(self,archive_id):
+        return ConfigHttp(self.db1.get_conn(), self.log,archive_id)
     def get_output_dir(self):
         return self.run_mode_config.get_output_dir()
     def get_db1_conn(self):

@@ -7,18 +7,17 @@ import urllib.request
 import http.cookiejar
 import urllib.parse
 import json
-import configparser
+#import configparser
 import sys
 #import MultipartPostHandler
 
 class ConfigHttp:
 
-    def __init__(self, ini_file,log):
-        config = configparser.ConfigParser()
+    def __init__(self, db_cursor,log,archive_id):
+        #config = configparser.ConfigParser()
+        self.db_cursor = db_cursor.cursor()
         self.log = log
-        config.read(ini_file)
-        self.host = config['HTTP']['host']
-        self.port = config['HTTP']['port']
+        self.host,self.port=self.get_config(archive_id)[0][:]
         self.headers = {"Content-Type":"application/json"} 
 
         #install cookie
@@ -26,6 +25,13 @@ class ConfigHttp:
         self.log.debug(cj)
         opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
         urllib.request.install_opener(opener)
+
+    def get_config(self,archive_id):
+        self.db_cursor.execute("select host,port from file_bag where file_number='{}'".format(archive_id))
+        http_config_list = self.db_cursor.fetchall()[:]
+        self.db_cursor.close()
+        self.log.info(http_config_list)
+        return http_config_list
 
     def set_host(self, host):
         self.host = host

@@ -17,10 +17,11 @@ if __name__ == '__main__':
     run_mode = global_config.get_run_mode() 
     run_case_list = global_config.get_run_case_list()  
     db1_conn = global_config.get_db1_conn()   
-    http = global_config.get_http()           
+
     log = global_config.get_log()
     output_dir = global_config.get_output_dir()
     archive_id =  global_config.get_run_archive_id()
+    http = global_config.get_http(archive_id)
     runner = unittest.TextTestRunner()
     case_runner = RunCase()
     case_runner.run_case(runner, run_mode, run_case_list, db1_conn, http, log, archive_id)
