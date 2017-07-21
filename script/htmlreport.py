@@ -41,34 +41,28 @@ class HtmlReport:
             # 查询测试失败的用例数
             if 0 == self.run_mode:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Fail', self.archive_id, tuple(self.run_case_list)))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number in {}'.format('Fail', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Fail',
-                                                                                                                self.archive_id))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Fail',self.archive_id))
             self.fail_num = self.cursor.fetchone()[0]
 
             # 查询测试通过的用例数
             if 0 == self.run_mode:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Pass', self.archive_id, tuple(self.run_case_list)))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number  in {}'.format('Pass', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Pass',
-                                                                                                                self.archive_id))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Pass',self.archive_id))
             self.success_num = self.cursor.fetchone()[0]
 
             # 查询测试出错的用例数
             if 0 == self.run_mode:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Error', self.archive_id, tuple(self.run_case_list)))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number in {}'.format('Error', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
-                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Error',
-                                                                                                                self.archive_id))
+                    'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Error',self.archive_id))
             self.error_num = self.cursor.fetchone()[0]
             self.log.info("total:{}; sucess:{}; failed:{}; error:{}".format(self.case_total,self.success_num,self.fail_num,self.error_num))
             page << p('测试用例数：' + str(self.case_total) + '&nbsp'*10 + '成功用例数：' + str(self.success_num) +
@@ -89,8 +83,7 @@ class HtmlReport:
                        + td('description', bgcolor='#ABABAB', align='center'))
             if self.run_mode == 0:
                 self.cursor.execute(
-                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and t.case_id in {}".format(
-                        self.archive_id, tuple(self.run_case_list)))
+                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and t.case_number in {}".format(self.archive_id,tuple(self.run_case_list)))
             else:
                 self.cursor.execute ("select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(self.archive_id))
             #self.cursor.execute(query)
