@@ -65,7 +65,8 @@ class HtmlReport:
                        + td('description', bgcolor='#ABABAB', align='center'))
             if self.run_mode == 0:
                 self.cursor.execute(
-                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and case_id in {}".format(self.archive_id,突破了（self.run_case_list）))
+                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and case_id in {}".format(
+                        self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute ("select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(self.archive_id))
             #self.cursor.execute(query)
