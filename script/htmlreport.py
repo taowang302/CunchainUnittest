@@ -42,8 +42,7 @@ class HtmlReport:
             if 0 == self.run_mode:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Fail',
-                        self.archive_id, tuple(self.run_case_list)))
+                        'Fail', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Fail',
@@ -54,8 +53,7 @@ class HtmlReport:
             if 0 == self.run_mode:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Pass',
-                        self.archive_id, tuple(self.run_case_list)))
+                        'Pass', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Pass',
@@ -66,8 +64,7 @@ class HtmlReport:
             if 0 == self.run_mode:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={} and case_number in {} in {}'.format(
-                        'Error',
-                        self.archive_id, tuple(self.run_case_list)))
+                        'Error', self.archive_id, tuple(self.run_case_list)))
             else:
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id={}'.format('Error',
