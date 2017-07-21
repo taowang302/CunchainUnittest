@@ -8,7 +8,7 @@ import time
 import os
 
 class HtmlReport:
-    def __init__(self, cursor,log):
+    def __init__(self, cursor, log, archive_id, run_mode, run_case_list):
         self.title = 'test_report_page'   # 网页标签名称
         self.filename = ''                   # 结果文件名
         self.time_took = '00:00:00'         # 测试耗时
@@ -18,6 +18,10 @@ class HtmlReport:
         self.case_total = 0                   # 运行测试用例总数
         self.cursor = cursor
         self.log = log
+        self.archive_id = archive_id
+        self.run_mode = run_mode
+        self.run_case_list = run_case_list
+
 
     # 生成HTML报告
     def generate_html(self,head, file):
@@ -59,7 +63,11 @@ class HtmlReport:
                        + td('test method', bgcolor='#ABABAB', align='center')
                        + td('result', bgcolor='#ABABAB', align='center')
                        + td('description', bgcolor='#ABABAB', align='center'))
-            self.cursor.execute ("select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='f_001' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number")
+            if self.run_mode == 0:
+                self.cursor.execute(
+                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and case_id in {}".format(self.archive_id,突破了（self.run_case_list）))
+            else:
+                self.cursor.execute ("select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(self.archive_id))
             #self.cursor.execute(query)
             query_result = self.cursor.fetchall()
             for row in query_result:

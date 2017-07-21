@@ -27,7 +27,7 @@ if __name__ == '__main__':
     case_runner.run_case(runner, run_mode, run_case_list, db1_conn, http, log, archive_id)
     end_time = datetime.datetime.now()
     
-    html_report = HtmlReport(db1_conn.cursor(),log)
+    html_report = HtmlReport(db1_conn.cursor(), log, archive_id, run_mode, run_case_list)
     html_report.set_time_took(str(end_time - start_time)) 
     html_report.generate_html('test report', output_dir)
     global_config.clear()
