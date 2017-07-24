@@ -4,15 +4,16 @@ import json
 import urlparse
 import sys
 
-# from script import getdb
-
+from control_center import Control
 
 def get_info(data):
+    Control.get_info()
     print('get info')
     return json.dumps({"status": "success"})
 
 
 def run_case(data):
+    Control.run_case()
     print("run case")
     return json.dumps({"status": "success"})
 
@@ -73,6 +74,7 @@ class TodoHandler(BaseHTTPRequestHandler):
 if __name__ == '__main__':
     from BaseHTTPServer import HTTPServer
 
+    # control=control_center.Control()
     server = HTTPServer(('', 8088), TodoHandler)
     print("Starting server, use <Ctrl-C> to stop")
     server.serve_forever()
