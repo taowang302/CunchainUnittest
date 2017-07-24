@@ -15,8 +15,8 @@ if __name__ == '__main__':
     start_time = datetime.datetime.now()
     global_config = Global()
     run_mode = global_config.get_run_mode() 
-    run_case_list = global_config.get_run_case_list()  
-    db1_conn = global_config.get_db1_conn()   
+    run_case_list = global_config.get_run_case_list()
+    db_conn = global_config.get_db_conn()
 
     log = global_config.get_log()
     output_dir = global_config.get_output_dir()
@@ -24,10 +24,10 @@ if __name__ == '__main__':
     http = global_config.get_http(archive_id)
     runner = unittest.TextTestRunner()
     case_runner = RunCase()
-    case_runner.run_case(runner, run_mode, run_case_list, db1_conn, http, log, archive_id)
+    case_runner.run_case(runner, run_mode, run_case_list, db_conn, http, log, archive_id)
     end_time = datetime.datetime.now()
-    
-    html_report = HtmlReport(db1_conn.cursor(), log, archive_id, run_mode, run_case_list)
+
+    html_report = HtmlReport(db_conn.cursor(), log, archive_id, run_mode, run_case_list)
     html_report.set_time_took(str(end_time - start_time)) 
     html_report.generate_html('test report', output_dir)
     global_config.clear()

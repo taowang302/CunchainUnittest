@@ -15,8 +15,8 @@ class  RunCase:
     def __init__(self):
         pass
 
-    def run_case(self, runner, run_mode, run_case_list, db1_conn, http, log, archive_id):
-        db1_cursor = db1_conn.cursor()
+    def run_case(self, runner, run_mode, run_case_list, db_conn, http, log, archive_id):
+        db1_cursor = db_conn.cursor()
         db1_cursor.execute("SELECT COUNT(file_number)  FROM file_bag where file_number='{}'".format(archive_id))
         archive_num = db1_cursor.fetchone()[0]
         #db1_cursor.close()
@@ -29,13 +29,13 @@ class  RunCase:
             db1_cursor.close()
         global test_data
         if 1 == run_mode:
-            db1_cursor = db1_conn.cursor()
+            db1_cursor = db_conn.cursor()
             db1_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(archive_id))
             test_case_num = db1_cursor.fetchone()[0]
             db1_cursor.close()
 
             for case_id in range(1, test_case_num+1):
-                 db1_cursor = db1_conn.cursor()
+                db1_cursor = db_conn.cursor()
                  #db2_cursor = db2_conn.cursor()
                  db1_cursor.execute('select t.case_name,t.http_method,t.queryparameters,f.host,r.except_response_code,r.except_response,t.test_method from usercase t,file_bag f,test_result r where f.file_number="{}" and t.case_number={} and r.from_view_id=f.file_number and f.file_number=t.from_view_id'.format(archive_id,case_id))
                  tmp_result = db1_cursor.fetchall()[:]
@@ -58,7 +58,7 @@ class  RunCase:
                  db1_cursor.close()
         elif 0 == run_mode:  
             for case_id in run_case_list:
-                 db1_cursor = db1_conn.cursor()
+                db1_cursor = db_conn.cursor()
                  #db2_cursor = db2_conn.cursor()
                  db1_cursor.execute('select t.case_name,t.http_method,t.queryparameters,f.host,r.except_response_code,r.except_response,t.test_method from usercase t,file_bag f,test_result r where f.file_number="{}" and t.case_number={} and r.from_view_id=f.file_number and f.file_number=t.from_view_id'.format(archive_id,case_id))
                  tmp_result = db1_cursor.fetchall()[:]
