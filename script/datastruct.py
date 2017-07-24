@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-__author__ = 'shouke'
 
 # 定义结构体
 class DataStruct:
@@ -13,7 +12,7 @@ class DataStruct:
         self.request_url = ''  #接口请求url
         self.request_param = ''#请求参数
         self.test_method = ''  #测试方法
-        self.test_desc = ''    #测试(用力)描述
+        self.test_desc = ''  # 测试(用例)描述
         self.result = ''       #测试结果
         self.reason = ''       #失败原因
 
