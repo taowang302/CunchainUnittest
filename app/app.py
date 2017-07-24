@@ -1,7 +1,8 @@
 from BaseHTTPServer import BaseHTTPRequestHandler
 import cgi
 import json
-
+import urlparse
+import sys
 
 # from script import getdb
 
@@ -24,11 +25,18 @@ class TodoHandler(BaseHTTPRequestHandler):
         if self.path == '/':
             self.send_error(404, "File not found.")
             return
-        print(self.path)
-        self.send_response(200)
+        parse_path = urlparse.urlparse(self.path)
+        query_dic = urlparse.parse_qs(parse_path.query, True)
+        print(query_dic)
+        msg_return = self.gen_msg(query_dic)
+        print (msg_return)
+        if msg_return[0]:
+            self.send_response(msg_return[1])
+        else:
+            self.send_response(msg_return[1])
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(self.gen_msg('get_name'))
+        self.wfile.write(msg_return[2])
 
     def do_POST(self):
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
@@ -40,20 +48,26 @@ class TodoHandler(BaseHTTPRequestHandler):
             return
         msg_return = self.gen_msg(post_values)
         if msg_return[0]:
-            self.send_response(200)
+            self.send_response(msg_return[1])
         else:
-            self.send_response(415)
+            self.send_response(msg_return[1])
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(msg_return)
+        self.wfile.write(msg_return[1])
 
     def gen_msg(self, post_body):
-        method = post_body.get("method")
+        method = ''.join((post_body.get("method")))
+        print (method)
         data = post_body.get("data")
         if method_dic.get(method):
-            return (True, method_dic.get(method)(data))
+            try:
+                return_data = method_dic.get(method)(data)
+            except:
+                return (True, 500, sys.exc_info()[1])
+            else:
+                return (True, 200, return_data)
         else:
-            return (False, json.dumps({"error": "can not understand this method"}))
+            return (False, 400, json.dumps({"error": "can not understand this method"}))
 
 
 if __name__ == '__main__':
