@@ -62,7 +62,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                     response_code, self.test_data.case_id, self.archive_id))
             self.db_cursor.execute(
                 "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
-                    json.dumps(response), self.test_data.case_id, self.archive_id))
+                    json.dumps(response).replace("'", "\'"), self.test_data.case_id, self.archive_id))
             self.db_cursor.execute('commit')
        except Exception as e:
            self.log.error(e)

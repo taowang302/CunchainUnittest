@@ -50,8 +50,8 @@ class ConfigHttp:
     def get(self, url, params,if_get_png=False):
         self.log.debug ("===============\n url => {}\n params => {}\n===================".format(url, params))
         params = urllib.parse.urlencode(eval(params))
-        self.log.info(params)
-        self.log.info(type(params))
+        self.log.debug(params)
+        self.log.debug(type(params))
         params = params.replace('None','')
         url = "http://{}:{}{}?{}".format(self.host,str(self.port),url,params)
         self.log.info (url)
