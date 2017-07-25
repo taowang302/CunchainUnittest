@@ -1,15 +1,15 @@
-from BaseHTTPServer import BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler
 import cgi
 import json
-import urlparse
+import  urllib.parse
 import sys
 
 from control_center import Control
 
 def get_info(data):
-    Control.get_info()
-    print('get info')
-    return json.dumps({"status": "success"})
+    return_msg = Control().get_info()
+    print('get info\n{}'.format(return_msg))
+    return return_msg 
 
 
 def run_case(data):
@@ -26,8 +26,8 @@ class TodoHandler(BaseHTTPRequestHandler):
         if self.path == '/':
             self.send_error(404, "File not found.")
             return
-        parse_path = urlparse.urlparse(self.path)
-        query_dic = urlparse.parse_qs(parse_path.query, True)
+        parse_path = urllib.parse.urlparse(self.path)
+        query_dic = urllib.parse.parse_qs(parse_path.query, True)
         print(query_dic)
         msg_return = self.gen_msg(query_dic)
         print (msg_return)
@@ -37,13 +37,17 @@ class TodoHandler(BaseHTTPRequestHandler):
             self.send_response(msg_return[1])
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(msg_return[2])
+        self.wfile.write(json.dumps(eval(msg_return[2])))
 
     def do_POST(self):
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
+        print("ctype:{},type:{}\npdict:{},type:{}".format(ctype,type(ctype),pdict,type(pdict)))
         if ctype == 'application/json':
             length = int(self.headers['content-length'])
-            post_values = json.loads(self.rfile.read(length))
+            print(length)
+            post_values = self.rfile.read(length).decode()
+            post_values = json.loads(post_values)
+            print(post_values)
         else:
             self.send_error(415, "Only json data is supported.")
             return
@@ -54,7 +58,9 @@ class TodoHandler(BaseHTTPRequestHandler):
             self.send_response(msg_return[1])
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(msg_return[1])
+        print(msg_return[2])
+        print(type(msg_return[2]))
+        self.wfile.write(json.dumps(msg_return[2]).encode(encoding="utf-8"))
 
     def gen_msg(self, post_body):
         method = ''.join((post_body.get("method")))
@@ -72,7 +78,7 @@ class TodoHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    from BaseHTTPServer import HTTPServer
+    from http.server import HTTPServer
 
     # control=control_center.Control()
     server = HTTPServer(('', 8088), TodoHandler)

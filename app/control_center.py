@@ -1,11 +1,12 @@
+import sys
+sys.path.append("/root/unittest")
+sys.path.append("/root/unittest/script")
 from script.getdb import GetDB
 from script.confighttp import ConfigHttp
 import script.configlog as configlog
 from script.runcase import RunCase
 from script.htmlreport import HtmlReport
 from script.configrunmode import ConfigRunMode
-import sys
-
 import datetime
 import unittest
 
@@ -45,14 +46,22 @@ class Control:
     def get_info(self):
         return_msg = {}
         try:
-            db_cursor = self.global_config.get_db_conn().cursor()
+            db_conn = self.global_config.get_db_conn()
+            db_cursor = db_conn.cursor()
             db_cursor.execute("SELECT file_number,description  FROM file_bag")
         except:
-            return {"status": "error", "data": sys.exc_info()[1]}
+            err_reason = sys.exc_info()
+            print("err_reason => {}\ntype => {}".format(err_reason,type(err_reason)))
+            return {"status": "error", "data":''.join(sys.exc_info()[1])}
         else:
             return_msg["status"] = "success"
-            data = {}
+            data = []
             file_bag = db_cursor.fetchall()
+            for item in file_bag:
+                db_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(item[0]))
+                case_nu = db_cursor.fetchone()[0]
+                data.append({"arhive_id":item[0],"case_nu":case_nu,"description":item[1]})
+            return_msg["data"] = data
             return return_msg
 
     def run_case(self, archive_id):
