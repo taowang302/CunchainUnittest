@@ -71,7 +71,12 @@ class Control:
         start_time = datetime.datetime.now()
         db_conn = self.global_config.get_db_conn()
         log = self.global_config.get_log()
-        http = ConfigHttp(db_conn, log, archive_id)
+        try:
+            http = ConfigHttp(db_conn, log, archive_id)
+        except ValueError as e:
+            return {"status":"error","data":"{}".format(e)}
+        except:
+            return {"status":"error","data":"{}".format(sys.exc_info()[1])}
         runner = unittest.TextTestRunner()
         try:
             case_runner = RunCase()
@@ -82,7 +87,7 @@ class Control:
             html_report.set_time_took(str(end_time - start_time))
             html_report.generate_html('test report', output_dir)
         except:
-            return {"status":"error","data":"".format(sys.exc_info()[1])}
+            return {"status":"error","data":"{}".format(sys.exc_info()[1])}
         else:
             case_total,success_nu,fail_nu,err_nu,report_url=html_report.get_info()
             self.global_config.clear()

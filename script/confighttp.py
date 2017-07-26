@@ -16,7 +16,10 @@ class ConfigHttp:
         #config = configparser.ConfigParser()
         self.db_cursor = db_cursor.cursor()
         self.log = log
-        self.host,self.port=self.get_config(archive_id)[0][:]
+        try:
+            self.host,self.port=self.get_config(archive_id)[0][:]
+        except:
+            raise ValueError('Wrong archive id')
         self.headers = {"Content-Type":"application/json"} 
 
         #install cookie

@@ -21,6 +21,7 @@ class  RunCase:
         # db_cursor.close()
         if int(archive_num) != 1:
             log.error("Wrong archive id :[{}]".format(archive_id))
+            raise ValueError("Wrong archive id :[{}]".format(archive_id))
             return
         else:
             db_cursor.execute(

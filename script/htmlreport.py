@@ -30,7 +30,7 @@ class HtmlReport:
             page << p('测试总耗时：' + self.time_took)
 
             # 查询测试用例总数
-            query = ('SELECT count(case_number) FROM test_result')
+            query = ('SELECT count(case_number) FROM test_result where from_view_id="{}"'.format(self.archive_id))
             if self.run_mode == 0:
                 self.case_total = len(self.run_case_list)
             else:
@@ -128,3 +128,6 @@ class HtmlReport:
     def set_time_took(self, time):
         self.time_took = time
         return self.time_took
+
+    def get_info(self):
+        return (self.case_total,self.success_num,self.error_num,self.fail_num,self.filename)
