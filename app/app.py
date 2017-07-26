@@ -1,6 +1,8 @@
 from http.server import BaseHTTPRequestHandler
+from http.server import HTTPServer
 import cgi
 import json
+from socketserver import ThreadingMixIn
 import  urllib.parse
 import sys
 from control_center import GlobalConfig
@@ -71,12 +73,19 @@ class TodoHandler(BaseHTTPRequestHandler):
         else:
             return (False, 400, json.dumps({"error": "can not understand this method"}))
 
+class ThreadingServer(ThreadingMixIn, HTTPServer):
+    pass
 
 if __name__ == '__main__':
-    from http.server import HTTPServer
     global_config = GlobalConfig()
     host,port = global_config.get_http_config() 
-    # control=control_center.Control()
+
+    # Single thread
     server = HTTPServer((host, port), TodoHandler)
+
+    # Multithreading
+    # server = ThreadingServer((host, port), TodoHandler)
+
+
     print("Starting server, use <Ctrl-C> to stop")
     server.serve_forever()
