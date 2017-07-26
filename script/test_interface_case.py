@@ -157,7 +157,7 @@ class TestInterfaceCase(ParametrizedTestCase):
        else:
            self.log.error("can not find order number")
            self.db_cursor.execute(
-               'UPDATE test_result SET result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format("Fail",
+               'UPDATE test_result SET actual_response_code = "000",result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format("Fail",
                                                                                                             self.test_data.case_id,
                                                                                                             self.archive_id))
            self.db_cursor.execute(
