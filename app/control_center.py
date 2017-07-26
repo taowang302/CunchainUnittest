@@ -1,6 +1,9 @@
 import sys
-sys.path.append("/root/unittest")
-sys.path.append("/root/unittest/script")
+#sys.path.append("/root/unittest")
+#sys.path.append("/root/unittest/script")
+
+sys.path.append('/'.join(sys.path[0].split('/')[:-1]))
+sys.path.append("{}/script".format('/'.join(sys.path[0].split('/')[:-1])))
 from script.getdb import GetDB
 from script.confighttp import ConfigHttp
 import script.configlog as configlog
