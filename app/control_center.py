@@ -42,16 +42,13 @@ class GlobalConfig:
 class Control:
     def __init__(self):
         self.global_config = GlobalConfig()
-
+        self.db_conn = self.global_config.get_db_conn()
+        self.db_cursor = self.db_conn.cursor()
     def get_info(self):
         return_msg = {}
         try:
-            db_conn = self.global_config.get_db_conn()
-            db_cursor = db_conn.cursor()
-            db_cursor.execute("SELECT file_number,description  FROM file_bag")
+            self.db_cursor.execute("SELECT file_number,description  FROM file_bag")
         except:
-            err_reason = sys.exc_info()
-            print("err_reason => {}\ntype => {}".format(err_reason,type(err_reason)))
             return {"status": "error", "data":'{}'.format(sys.exc_info()[1])}
         else:
             return_msg["status"] = "success"
@@ -60,12 +57,36 @@ class Control:
             total_nu = len(file_bag)
             return_msg["total_nu"] = total_nu
             for item in file_bag:
-                db_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(item[0]))
-                case_nu = db_cursor.fetchone()[0]
+                slef.db_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(item[0]))
+                case_nu = self.db_cursor.fetchone()[0]
                 data.append({"arhive_id":item[0],"case_nu":case_nu,"description":item[1]})
             return_msg["data"] = data
             return return_msg
-
+    
+    def get_case_info(self,archive_id):
+        try:
+            archive_id = ''.join(archive_id)
+        except:
+            return {"status":"error","data":"".format(sys.exc_info()[1])}
+        try:
+            self.db_cursor.execute("SELECT file_number FROM file_bag")
+        except:
+            return {"status": "error", "data":'{}'.format(sys.exc_info()[1])}
+        else:
+            archive_id_list = self.db_cursor.fetchall()
+            if ('{}'.format(archive_id),) not in archive_id_list:
+                return {"status": "error", "data":'Invalid Archive ID'}
+        try:
+            self.db_cursor.execute("SELECT case_number,case_name,http_method,description  FROM usercase where from_view_id='{}'".format(archive_id))
+        except:
+            return {"status": "error", "data":'{}'.format(sys.exc_info()[1])}
+        else:
+            archive_info = self.db_cursor.fetchall()
+            return_msg ={}
+            data = []
+            for item in archive_info:
+                data.append({"case id":item[0],"api":item[1],"method":item[2],"description":item[3]})
+            return {"status":"success","total":len(archive_info),"data":data}
     def run_case(self, archive_id):
         try:
             archive_id = ''.join(archive_id)

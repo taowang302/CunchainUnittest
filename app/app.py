@@ -17,8 +17,11 @@ def run_case(data):
     return_msg = Control().run_case(data)
     return return_msg
 
+def get_case_info(data):
+    return_msg = Control().get_case_info(data)
+    return return_msg
 
-method_dic = {"get_info": get_info, "run_case": run_case}
+method_dic = {"get_info": get_info, "run_case": run_case, "get_case_info":get_case_info}
 
 
 class TodoHandler(BaseHTTPRequestHandler):
