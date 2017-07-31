@@ -75,31 +75,36 @@ class HtmlReport:
             tab1 << tr(td('case id', bgcolor='#ABABAB', align='center')
                        + td('http method', bgcolor='#ABABAB', align='center')
                        + td('interface name', bgcolor='#ABABAB', align='center')
+                       + td('description', bgcolor='#ABABAB', align='center')
                        + td('apply data', bgcolor='#ABABAB', align='center')
                        + td('except return', bgcolor='#ABABAB', align='center')
                        + td('acture return', bgcolor='#ABABAB', align='center')
                        + td('acture response', bgcolor='#ABABAB', align='center')
                        + td('test method', bgcolor='#ABABAB', align='center')
                        + td('result', bgcolor='#ABABAB', align='center')
-                       + td('description', bgcolor='#ABABAB', align='center'))
+                       + td('remarks', bgcolor='#ABABAB', align='center'))
             if self.run_mode == 0:
                 self.cursor.execute(
-                    "select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and t.case_number in {}".format(self.archive_id,tuple(self.run_case_list)))
+                    "select u.case_number,u.http_method,u.case_name,u.description,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,t.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and t.case_number in {}".format(
+                        self.archive_id, tuple(self.run_case_list)))
             else:
-                self.cursor.execute ("select u.case_number,u.http_method,u.case_name,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,u.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(self.archive_id))
+                self.cursor.execute(
+                    "select u.case_number,u.http_method,u.case_name,u.description,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,t.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(
+                        self.archive_id))
             #self.cursor.execute(query)
             query_result = self.cursor.fetchall()
             for row in query_result:
-                tab1 << tr(td((row[0]), align='center') 
-                          + td(row[1])
-                          + td(row[2]) 
-                          + td(row[3])
-                          + td(row[4]) 
-                          + td(row[5]) 
-                          + td(row[6])
-                          + td(row[7], align='center') 
-                          + td(row[8])
-                          + td(row[9]))
+                tab1 << tr(td((row[0]), align='center')
+                           + td(row[1])
+                           + td(row[2])
+                           + td(row[3])
+                           + td(row[4])
+                           + td(row[5])
+                           + td(row[6])
+                           + td(row[7], align='center')
+                           + td(row[8])
+                           + td(row[9]
+                                + td(row[10]))
 
             self._set_result_filename(file)
             page.printOut(self.filename)
