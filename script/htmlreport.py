@@ -103,8 +103,8 @@ class HtmlReport:
                            + td(row[6])
                            + td(row[7], align='center')
                            + td(row[8])
-                           + td(row[9]
-                                + td(row[10]))
+                           + td(row[9])
+                           + td(row[10]))
 
             self._set_result_filename(file)
             page.printOut(self.filename)
