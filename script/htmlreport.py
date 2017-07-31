@@ -39,6 +39,8 @@ class HtmlReport:
 
             # 查询测试失败的用例数
             if 0 == self.run_mode:
+                if 1 == len(self.run_case_list):
+                    self.run_case_list.append(-1)
                 self.cursor.execute(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number in {}'.format('Fail', self.archive_id, tuple(self.run_case_list)))
             else:

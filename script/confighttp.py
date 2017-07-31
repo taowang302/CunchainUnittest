@@ -73,7 +73,7 @@ class ConfigHttp:
             self.log.info("receive response:\nresponse_code => {}\nresponse => {}\n========================\n".format(response_code,response))
             return (response_code,json_response)
         except Exception as e:
-            self.log.error('%s' % e)
+            self.log.error(e)
             return ('000',e)
         except:
             return ('000',sys.exc_info()[1])

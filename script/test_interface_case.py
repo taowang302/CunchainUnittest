@@ -35,12 +35,14 @@ class TestInterfaceCase(ParametrizedTestCase):
        response_code,response = return_msg[:]
        if '000' == response_code:
             self.test_data.result = 'Error'
+            response = '{}'.format(response).replace("'","\\'")
        else: 
             self.log.debug(response.get("result"))
             if int(response_code) == int(self.test_data.except_code) and response.get("result") == "success":
                 self.test_data.result = 'Pass'
             else:
                 self.test_data.result = 'Fail'
+            response = json.dumps(response).replace("'","\\'")
        try:
             self.log.debug("++++++++++++++++++\n result => {}\n case_id => {}\n++++++++++++++++++".format(self.test_data.result, self.test_data.case_id))
             self.db_cursor.execute(
@@ -53,15 +55,16 @@ class TestInterfaceCase(ParametrizedTestCase):
        except :
             self.log.error(sys.exc_info()[1])
        try:
-            self.log.debug(type(response))
             self.log.debug(response)
-            self.log.debug('UPDATE test_result SET actual_response="{}" where case_number={}'.format(json.dumps(response),self.test_data.case_id))
+            # self.log.debug('UPDATE test_result SET actual_response="{}" where case_number={}'.format(json.dumps(response),self.test_data.case_id))
             self.db_cursor.execute(
-                "UPDATE test_result SET actual_response_code={} where case_number={} and from_view_id = '{}'".format(
-                    response_code, self.test_data.case_id, self.archive_id))
-            self.db_cursor.execute(
-                "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
-                    json.dumps(response).replace("'", "\\'"), self.test_data.case_id, self.archive_id))
+                "UPDATE test_result SET actual_response_code={} where case_number={} and from_view_id = '{}'".format(response_code, self.test_data.case_id, self.archive_id))
+            if 'Error' == self.test_data.result:
+                self.db_cursor.execute(
+                "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(response, self.test_data.case_id, self.archive_id))
+            else:
+                self.db_cursor.execute(
+                "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(response, self.test_data.case_id, self.archive_id))
             self.db_cursor.execute('commit')
        except Exception as e:
            self.log.error(e)
@@ -142,14 +145,17 @@ class TestInterfaceCase(ParametrizedTestCase):
                if int(response_code) == int(self.test_data.except_code): 
                    self.test_data.result = 'Pass'
                else:
-                   self.test_data.result = 'Error'
+                   self.test_data.result = 'Fail'
            try:
                self.db_cursor.execute(
                    'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                        self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute(
-                   "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
+               if "Error" != self.test_data.result:
+                   self.db_cursor.execute(
+                       "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                        json.dumps(response), self.test_data.case_id, self.archive_id))
+               else:
+                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                self.db_cursor.execute('commit')
            except:
                self.log.error('sys.exc_info[1]')
@@ -189,26 +195,17 @@ class TestInterfaceCase(ParametrizedTestCase):
            try:
                self.log.debug("++++++++++++++++++\n result => {}\n case_id => {}\n++++++++++++++++++".format(self.test_data.result,self.test_data.case_id))
                self.db_cursor.execute(
-                   'UPDATE test_result SET result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
-                       self.test_data.result, self.test_data.case_id, self.archive_id))
+                   'UPDATE test_result SET result = "{}",actual_response_code={} WHERE case_number = {} and from_view_id = "{}"'.format(
+                       self.test_data.result, response_code,self.test_data.case_id, self.archive_id))
+               if "Error" != self.test_data.result:
+                   self.db_cursor.execute(
+                       "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
+                       json.dumps(response), self.test_data.case_id, self.archive_id))
+               else:
+                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                self.db_cursor.execute('commit')
-           except Exception as e:
-               print('------\n{}'.format(e))
-               self.db_cursor.execute('rollback')
            except:
                self.log.error("Found err:{}".format(sys_exc_info()[1]))
-           try:
-               self.log.debug(type(response))
-               self.log.info('Get response:\n{}'.format(response))
-               self.db_cursor.execute(
-                   'UPDATE test_result SET actual_response_code={} where case_number={} and from_view_id = "{}"'.format(
-                       response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute(
-                   'UPDATE test_result SET actual_response="{}" where case_number={} and from_view_id = "{}"'.format(
-                       eval(response), self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
-           except Exception as e:
-               self.log.error('%s' % e)
        else:
            slef.log.error("Upload file do not found:{}".format(img_path))
            self.db_cursor.execute(
