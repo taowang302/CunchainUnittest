@@ -6,6 +6,8 @@ import  unittest
 import json
 import os
 import sys
+import string
+from random import randint,choice
 
 class ParametrizedTestCase(unittest.TestCase):
     """ TestCase classes that want to be parametrized should
@@ -158,7 +160,7 @@ class TestInterfaceCase(ParametrizedTestCase):
                    self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                self.db_cursor.execute('commit')
            except:
-               self.log.error('sys.exc_info[1]')
+               self.log.error(sys.exc_info[1])
            return
        else:
            self.log.error("can not find order number")
@@ -171,6 +173,124 @@ class TestInterfaceCase(ParametrizedTestCase):
                    "Can not find a valid order number", self.test_data.case_id, self.archive_id))
            self.db_cursor.execute('commit')
        return
+
+   def test_sms_normal(self):
+       self.log.info(self.test_data.request_param)
+       self.db_cursor.execute(
+           "select t.result,t.actual_response from test_result t, usercase u where u.case_name='/api/v0/captcha/image' and t.case_number = u.case_number and u.from_view_id='{}' and u.from_view_id=t.from_view_id".format(
+               self.archive_id))
+       tmp_result = self.db_cursor.fetchall()[:]
+       self.log.info(tmp_result)
+       case_result = tmp_result[0][0]
+       case_response = tmp_result[0][1]
+       if "Pass" == case_result:
+           pay_uri = eval(case_response).get("code")
+           self.test_data.request_param=eval(self.test_data.request_param)
+           self.test_data.request_param["captcha_image"] = eval(case_response).get("code")
+           self.test_data.request_param["phone_no"] = "137{}".format("".join(choice(string.digits) for i in range(randint(9,9))))
+           self.test_data.request_param=str(self.test_data.request_param)
+           if "GET" == self.test_data.http_method :
+               return_msg = self.http.get(self.test_data.request_url,  self.test_data.request_param)
+               self.log.info(self.test_data.request_param)
+           elif "POST" == self.test_data.http_method :
+               return_msg = self.http.post(self.test_data.request_url,  self.test_data.request_param)
+               self.log.info(self.test_data.request_param)
+           else:
+               self.log.error("do not support this method:{},please use POST or GET".format(self.test_data.http_method))
+           if '000' == return_msg[0]:
+                self.test_data.result = 'Error'
+           else:
+               response_code, response = return_msg[:]
+               if int(response_code) == int(self.test_data.except_code):
+                   self.test_data.result = 'Pass'
+               else:
+                   self.test_data.result = 'Fail'
+           try:
+               self.db_cursor.execute(
+                   'UPDATE usercase SET queryparameters = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
+                        self.test_data.request_param, self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute(
+                   'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
+                       self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               if "Error" != self.test_data.result:
+                   self.db_cursor.execute(
+                       "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
+                       json.dumps(response), self.test_data.case_id, self.archive_id))
+               else:
+                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute('commit')
+           except:
+               self.log.error(sys.exc_info[1])
+           return
+       else:
+           self.log.error("can not find valid captcha_image")
+           try:
+               self.db_cursor.execute(
+                   'UPDATE test_result SET result = "Error",actual_response_code = "000" WHERE case_number = {} and from_view_id = "{}"'.format(self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format("can not find order valid captcha_image message", self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute('commit')
+           except:
+               self.log.error(sys.exc_info[1])
+          
+
+
+   def test_register_normal(self):
+       self.log.info(self.test_data.request_param)
+       self.db_cursor.execute(
+           "select t.result,t.actual_response,queryparameters from test_result t, usercase u where u.case_name='/api/v0/captcha/sms' and t.case_number = u.case_number and u.from_view_id='{}' and u.from_view_id=t.from_view_id".format(
+               self.archive_id))
+       tmp_result = self.db_cursor.fetchall()[:]
+       self.log.info(tmp_result)
+       case_result = tmp_result[0][0]
+       case_response = tmp_result[0][1]
+       case_request = tmp_result[0][2]
+       if "Pass" == case_result:
+           self.test_data.request_param=eval(self.test_data.request_param)
+           self.test_data.request_param["phone_no"] = eval(case_request).get("phone_no")
+           self.test_data.request_param["account"] = "test_{}".format(self.test_data.request_param.get("phone_no"))
+           self.test_data.request_param["captcha_sms"] = eval(case_response).get("code")
+           self.test_data.request_param=str(self.test_data.request_param)
+           if "GET" == self.test_data.http_method :
+               return_msg = self.http.get(self.test_data.request_url,  self.test_data.request_param)
+           elif "POST" == self.test_data.http_method :
+               return_msg = self.http.post(self.test_data.request_url,  self.test_data.request_param)
+           else:
+               self.log.error("do not support this method:{},please use POST or GET".format(self.test_data.http_method))
+           if '000' == return_msg[0]:
+                self.test_data.result = 'Error'
+           else:
+               response_code, response = return_msg[:]
+               if int(response_code) == int(self.test_data.except_code):
+                   self.test_data.result = 'Pass'
+               else:
+                   self.test_data.result = 'Fail'
+           try:
+               self.db_cursor.execute(
+                   'UPDATE usercase SET queryparameters = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
+                        self.test_data.request_param, self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute(
+                   'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
+                       self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               if "Error" != self.test_data.result:
+                   self.db_cursor.execute(
+                       "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
+                       json.dumps(response), self.test_data.case_id, self.archive_id))
+               else:
+                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute('commit')
+           except:
+               self.log.error(sys.exc_info[1])
+           return
+       else:
+           self.log.error("can not find order sms message")
+           try:
+               self.db_cursor.execute(
+                   'UPDATE test_result SET result = "Error",actual_response_code = "000" WHERE case_number = {} and from_view_id = "{}"'.format(self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format("can not find order sms message", self.test_data.case_id, self.archive_id))
+               self.db_cursor.execute('commit')
+           except:
+               self.log.error(sys.exc_info[1])
+
 
    def test_upload_img(self):
        self.log.info(self.test_data.request_param)
