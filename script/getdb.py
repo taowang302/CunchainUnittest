@@ -46,3 +46,4 @@ class GetDB:
             return self.cursor.execute(sql)
         except:
             self.log.error(sys.exc_info()[1])
+            return
