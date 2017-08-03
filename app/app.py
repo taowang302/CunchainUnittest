@@ -31,17 +31,17 @@ class TodoHandler(BaseHTTPRequestHandler):
             return
         parse_path = urllib.parse.urlparse(self.path)
         query_dic = urllib.parse.parse_qs(parse_path.query, True)
-        print(query_dic)
         msg_return = self.gen_msg(query_dic)
-        print (msg_return)
         self.send_response(msg_return[1])
+        response_mesg = json.dumps(msg_return[2]).encode(encoding="utf-8")
         self.send_header('Content-type', 'application/json')
+        self.send_header('Content-Length', len(response_mesg))
         self.end_headers()
-        self.wfile.write(json.dumps(msg_return[2]).encode(encoding="utf-8"))
+        self.wfile.write(response_mesg)
 
     def do_POST(self):
         ctype, pdict = cgi.parse_header(self.headers['content-type'])
-        print("ctype:{},type:{}\npdict:{},type:{}".format(ctype,type(ctype),pdict,type(pdict)))
+        # print("ctype:{},type:{}\npdict:{},type:{}".format(ctype,type(ctype),pdict,type(pdict)))
         if ctype == 'application/json':
             length = int(self.headers['content-length'])
             post_values = self.rfile.read(length).decode()
@@ -51,9 +51,11 @@ class TodoHandler(BaseHTTPRequestHandler):
             return
         msg_return = self.gen_msg(post_values)
         self.send_response(msg_return[1])
+        response_mesg = json.dumps(msg_return[2]).encode(encoding="utf-8")
         self.send_header('Content-type', 'application/json')
+        self.send_header('Content-Length', len(response_mesg))
         self.end_headers()
-        self.wfile.write(json.dumps(msg_return[2]).encode(encoding="utf-8"))
+        self.wfile.write(response_mesg)
 
     def gen_msg(self, post_body):
         try:
