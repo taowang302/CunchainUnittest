@@ -17,7 +17,7 @@ import json
 
 class GlobalConfig:
     def __init__(self):
-        self.log = configlog.config_log('../conf/global_config.ini')
+        self.log = configlog.config_log('../conf/global_config.ini', 'log_level')
         self.db = GetDB('../conf/global_config.ini', 'DATABASE', self.log)
         self.configserver = ConfigServer('../conf/global_config.ini')
     def get_log(self):
@@ -53,11 +53,12 @@ class Control:
         else:
             return_msg["status"] = "success"
             data = []
-            file_bag = db_cursor.fetchall()
+            file_bag = self.db_cursor.fetchall()
             total_nu = len(file_bag)
             return_msg["total_nu"] = total_nu
             for item in file_bag:
-                slef.db_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(item[0]))
+                self.db_cursor.execute(
+                    "SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(item[0]))
                 case_nu = self.db_cursor.fetchone()[0]
                 data.append({"arhive_id":item[0],"case_nu":case_nu,"description":item[1]})
             return_msg["data"] = data
