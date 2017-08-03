@@ -10,7 +10,7 @@ import configlog
 class Global:
     def __init__(self):
         self.log = configlog.config_log('../conf/global_config.ini', 'log_level')
-        self.dblog = configlog.config_log('../conf/global_config.ini', 'debug_db_log')
+        # self.dblog = configlog.config_log('../conf/global_config.ini', 'debug_db_log')
         #self.http = ConfigHttp('../conf/global_config.ini',self.log)
         self.db = GetDB('../conf/global_config.ini', 'DATABASE', self.log, self.dblog)
         #self.http = ConfigHttp(self.db1, self.log)
@@ -19,8 +19,8 @@ class Global:
     def get_log(self):
         return self.log
 
-    def get_dblog(self):
-        return self.dblog
+    # def get_dblog(self):
+    #     return self.dblog
 
     def get_http(self,archive_id):
         return ConfigHttp(self.db.get_conn(), self.log, archive_id)
