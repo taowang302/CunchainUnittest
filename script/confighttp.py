@@ -56,7 +56,7 @@ class ConfigHttp:
         self.log.debug(type(params))
         params = params.replace('None','')
         url = "http://{}:{}{}?{}".format(self.host,str(self.port),url,params)
-        self.log.info (url)
+        self.log.info("GET {}".format(url))
         request = urllib.request.Request(url, headers=self.headers)
         try:
             response = urllib.request.urlopen(request)
@@ -80,11 +80,12 @@ class ConfigHttp:
 
     def post(self, url, data):
         data = json.dumps(eval(data))
-        self.log.debug(data)
-        data = data.encode('utf-8')
         url = 'http://' + self.host + ':' + str(self.port)  + url
         self.log.info(url)
-        self.log.debug("send message:\n".format(data))
+        # print(json.dumps(json.loads(data), indent=4, sort_keys=False, ensure_ascii=False))
+        self.log.info(
+            "send message:\n{}".format(json.dumps(json.loads(data), indent=4, sort_keys=False, ensure_ascii=False)))
+        data = data.encode('utf-8')
         try:
             request = urllib.request.Request(url, headers=self.headers)
             response = urllib.request.urlopen(request, data)
@@ -94,7 +95,7 @@ class ConfigHttp:
             self.log.info("receive response:\nresponse_code => {}\nresponse => {}\n========================\n".format(response_code,response))
             return (response_code,json_response)
         except Exception as e:
-            self.log.error('%s' % e)
+            self.log.error(e)
             return ('000',e)
         except:
             return ('000',sys.exc_info()[1]) 
@@ -104,7 +105,7 @@ class ConfigHttp:
             post_data = f.read()
         files = {"form_input_field_name": post_data}
         payload = {"name":"resaon","reason":"id_card_image_0"}
-        url = 'http://' + self.host + ':' + str(self.port)  + url
+        url = 'http://' + self.host + ':' + str(self.port) + url
         try:
             self.log.debug(url)
             ret = requests.post(url, files=files,data=payload,cookies=self.cookie)
