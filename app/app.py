@@ -90,7 +90,15 @@ if __name__ == '__main__':
 
     # Multithreading
     # server = ThreadingServer((host, port), TodoHandler)
+    if host:
+        listen_host = host
+    else:
+        listen_host = '0.0.0.0'
 
-
-    print("Starting server, use <Ctrl-C> to stop")
-    server.serve_forever()
+    print("Starting server on {}:{}, use <Ctrl-C> to stop".format(listen_host, port))
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print('<Ctrl-C>')
+    except:
+        print('unknown error')
