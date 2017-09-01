@@ -1,20 +1,14 @@
 ﻿#!/usr/bin/env python
 # -*- coding:utf-8 -*-
-import configparser
 
 class ConfigRunMode:
-    def __init__(self, run_case_config_file):
-        config = configparser.ConfigParser()
-
-        # 从配置文件中读取运行模式
-        config.read(run_case_config_file)
+    def __init__(self, run_case_config):
         try:
-            self.run_mode = config['RUNCASECONFIG']['runmode']
-            self.run_mode = int(self.run_mode)
-            self.case_list = config['RUNCASECONFIG']['case_id']
-            self.case_list = eval(self.case_list)  # 把字符串类型的list转换为list
-            self.output_dir = config['OUTPUT']['output_dir']
-            self.archive_id = config['RUNCASECONFIG']['archive_id']
+            self.run_mode = int(run_case_config.get('runmode'))
+            self.case_list = eval(run_case_config.get('case_id'))
+            # self.case_list = eval(self.case_list)  # 把字符串类型的list转换为list
+            self.output_dir = run_case_config.get('output_dir')
+            self.archive_id = run_case_config.get('archive_id')
         except Exception as e:
             print('%s', e)
 

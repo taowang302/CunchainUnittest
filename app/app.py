@@ -5,7 +5,7 @@ import json
 from socketserver import ThreadingMixIn
 import  urllib.parse
 import sys
-from control_center import GlobalConfig
+# from control_center import GlobalConfig
 from control_center import Control
 
 def get_info(data):
@@ -21,6 +21,8 @@ def get_case_info(data):
     return_msg = Control().get_case_info(data)
     return return_msg
 
+
+# 接口函数字典表
 method_dic = {"get_info": get_info, "run_case": run_case, "get_case_info":get_case_info}
 
 
@@ -74,7 +76,6 @@ class TodoHandler(BaseHTTPRequestHandler):
                     return (True, 200, return_data)
                 else:
                     return(True,500,return_data)
-
         else:
             return (False, 400, json.dumps({"error": "can not understand this method"}))
 
@@ -82,8 +83,8 @@ class ThreadingServer(ThreadingMixIn, HTTPServer):
     pass
 
 if __name__ == '__main__':
-    global_config = GlobalConfig()
-    host,port = global_config.get_http_config() 
+    # global_config = GlobalConfig()
+    host, port = Control().get_server_config()
 
     # Single thread
     server = HTTPServer((host, port), TodoHandler)

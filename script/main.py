@@ -7,13 +7,15 @@ import datetime
 import unittest
 
 from runcase import RunCase
-from globalconfig import Global
+# from globalconfig import Global
+from globalconfig import GlobalConfig
 from htmlreport import HtmlReport
 
 if __name__ == '__main__':
 
     start_time = datetime.datetime.now()
-    global_config = Global()
+    # global_config = Global()
+    global_config = GlobalConfig()
     run_mode = global_config.get_run_mode() 
     run_case_list = global_config.get_run_case_list()
     db_conn = global_config.get_db_conn()

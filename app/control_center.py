@@ -4,39 +4,39 @@ import sys
 
 sys.path.append('/'.join(sys.path[0].split('/')[:-1]))
 sys.path.append("{}/script".format('/'.join(sys.path[0].split('/')[:-1])))
-from script.getdb import GetDB
+# from script.getdb import GetDB
 from script.confighttp import ConfigHttp
-import script.configlog as configlog
+# import script.configlog as configlog
 from script.runcase import RunCase
 from script.htmlreport import HtmlReport
-from script.configrunmode import ConfigRunMode
-from configserver import ConfigServer
+# from configserver import ConfigServer
 import datetime
 import unittest
-import json
+from globalconfig import GlobalConfig
 
-class GlobalConfig:
-    def __init__(self):
-        self.log = configlog.config_log('../conf/global_config.ini', 'log_level')
-        self.db = GetDB('../conf/global_config.ini', 'DATABASE', self.log)
-        self.configserver = ConfigServer('../conf/global_config.ini')
-    def get_log(self):
-        return self.log
 
-    def get_http(self, archive_id):
-        return ConfigHttp(self.db.get_conn(), self.log, archive_id)
-
-    def get_output_dir(self):
-        return self.configserver.get_output()
-
-    def get_http_config(self):
-        return self.configserver.config_server()
-
-    def get_db_conn(self):
-        return self.db.get_conn()
-
-    def clear(self):
-        self.db.get_conn().close()
+# class GlobalConfig:
+#     def __init__(self):
+#         self.log = configlog.config_log('../conf/global_config.ini', 'log_level')
+#         self.db = GetDB('../conf/global_config.ini', 'DATABASE', self.log)
+#         self.configserver = ConfigServer('../conf/global_config.ini')
+#     def get_log(self):
+#         return self.log
+#
+#     def get_http(self, archive_id):
+#         return ConfigHttp(self.db.get_conn(), self.log, archive_id)
+#
+#     def get_output_dir(self):
+#         return self.configserver.get_output()
+#
+#     def get_http_config(self):
+#         return self.configserver.config_server()
+#
+#     def get_db_conn(self):
+#         return self.db.get_conn()
+#
+#     def clear(self):
+#         self.db.get_conn().close()
 
 
 class Control:
@@ -44,6 +44,10 @@ class Control:
         self.global_config = GlobalConfig()
         self.db_conn = self.global_config.get_db_conn()
         self.db_cursor = self.db_conn.cursor()
+
+    def get_server_config(self):
+        return self.global_config.get_server_config()
+
     def get_info(self):
         return_msg = {}
         try:
@@ -88,6 +92,7 @@ class Control:
             for item in archive_info:
                 data.append({"case id":item[0],"api":item[1],"method":item[2],"description":item[3]})
             return {"status":"success","total":len(archive_info),"data":data}
+
     def run_case(self, archive_id):
         try:
             archive_id = ''.join(archive_id)
