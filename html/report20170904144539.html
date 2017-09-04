@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head><title>test_report_page</title>
+</head>
+<body><h1 align="center">test report</h1>
+<p>测试总耗时：0:00:00.118707</p>
+<p>
+    测试用例数：2&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp成功用例数：1&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp失败用例数：1&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp出错用例数：0</p>
+<table border="1" cellpadding="1" cellspacing="0" class="table">
+    <tr>
+        <td bgcolor="#ABABAB" align="center">case id</td>
+        <td bgcolor="#ABABAB" align="center">http method</td>
+        <td bgcolor="#ABABAB" align="center">interface name</td>
+        <td bgcolor="#ABABAB" align="center">description</td>
+        <td bgcolor="#ABABAB" align="center">apply data</td>
+        <td bgcolor="#ABABAB" align="center">except return</td>
+        <td bgcolor="#ABABAB" align="center">acture return</td>
+        <td bgcolor="#ABABAB" align="center">acture response</td>
+        <td bgcolor="#ABABAB" align="center">test method</td>
+        <td bgcolor="#ABABAB" align="center">result</td>
+        <td bgcolor="#ABABAB" align="center">remarks</td>
+
+    </tr>
+    <tr>
+        <td align="center">1</td>
+        <td>GET</td>
+        <td>/api/v0/user/login</td>
+        <td>login</td>
+        <td>{"user":"wangt","password":"8969ffe739e4f97f7ad717e13eae75cfcb657e8d"}</td>
+        <td>200</td>
+        <td>200</td>
+        <td align="center">{"result": "success", "jwt":
+            "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MDQ1MDc1MzksImVuYyI6IkVnWi9lYWxDNjlSeUxwS3JyZmdoaStzNHRwU1ZBYUpXUTc5QlNMN0I2bDJmbm96eldoZWFHbW5GQlZWd09HVEEiLCJleHAiOjE1MDQ1MTExMzl9._VVId_xvG8ylqL5BdoktwPZWZ19n8jDKYHwa9YsQ8yxCWSc5bT7VjnwMtaFJ4TGj"}
+        </td>
+        <td>test_default_normal</td>
+        <td>Pass</td>
+        <td>None</td>
+
+    </tr>
+    <tr>
+        <td align="center">9</td>
+        <td>POST</td>
+        <td>/api/v0/user/update</td>
+        <td>update account information</td>
+        <td>
+            {"account":"wangt","address":None,"authenticated":0,"avatar":None,"email":"110@qq.com","email2":None,"groups":"user","name":"wangt","number":"000001000000000099","org_number":"000001000000000010","password":"8969ffe739e4f97f7ad717e13eae75cfcb657e8d","phone_no2":None,"register_time":"2017-07-05T02:02:04.000Z"}
+        </td>
+        <td>200</td>
+        <td>200</td>
+        <td align="center">{"result": "you cannot update authenticated", "jwt":
+            "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MDQ1MDc1MzksImVuYyI6IkVnWi9lYWxDNjlSeUxwS3JyZmdoaStzNHRwU1ZBYUpXUTc5QlNMN0I2bDJmbm96eldoZWFHbW5GQlZWd09HVEEiLCJleHAiOjE1MDQ1MTExMzl9._VVId_xvG8ylqL5BdoktwPZWZ19n8jDKYHwa9YsQ8yxCWSc5bT7VjnwMtaFJ4TGj"}
+        </td>
+        <td>test_default_normal</td>
+        <td>Fail</td>
+        <td>None</td>
+
+    </tr>
+</table>
+</body>
+</html>

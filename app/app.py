@@ -7,6 +7,7 @@ import  urllib.parse
 import sys
 # from control_center import GlobalConfig
 from control_center import Control
+import re
 
 def get_info(data):
     return_msg = control.get_info()
@@ -31,6 +32,18 @@ class TodoHandler(BaseHTTPRequestHandler):
         if self.path == '/':
             self.send_error(404, "File not found.")
             return
+        elif re.match('^/report(.*?)html$', self.path):
+            log.info(self.path)
+            html_path = '../html/{}'.format(self.path.split('/')[1])
+            log.info(html_path)
+            with open(html_path, 'rb') as f:
+                self.send_response(200)
+                response_mesg = f.read()
+                self.send_header('Content-type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', len(response_mesg))
+                self.end_headers()
+                self.wfile.write(response_mesg)
+                return
         parse_path = urllib.parse.urlparse(self.path)
         query_dic = urllib.parse.parse_qs(parse_path.query, True)
         msg_return = self.gen_msg(query_dic)
