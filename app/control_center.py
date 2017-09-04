@@ -44,6 +44,7 @@ class Control:
         self.global_config = GlobalConfig()
         self.db_conn = self.global_config.get_db_conn()
         self.db_cursor = self.db_conn.cursor()
+        self.log = self.global_config.get_log()
 
     def get_server_config(self):
         return self.global_config.get_server_config()

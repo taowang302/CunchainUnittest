@@ -85,6 +85,7 @@ class ThreadingServer(ThreadingMixIn, HTTPServer):
 if __name__ == '__main__':
     control = Control()
     # global_config = GlobalConfig()
+    log = control.log
     host, port = control.get_server_config()
 
     # Single thread
@@ -96,11 +97,13 @@ if __name__ == '__main__':
         listen_host = host
     else:
         listen_host = '0.0.0.0'
-
+    log.info("Starting server on {}:{}".format(listen_host, port))
     print("Starting server on {}:{}, use <Ctrl-C> to stop".format(listen_host, port))
     try:
         server.serve_forever()
     except KeyboardInterrupt:
+        log.info('quit with <Ctrl-C>')
         print('<Ctrl-C>')
     except:
+        log.info('quit with unknown error')
         print('unknown error')
