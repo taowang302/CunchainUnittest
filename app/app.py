@@ -48,7 +48,9 @@ class TodoHandler(BaseHTTPRequestHandler):
             length = int(self.headers['content-length'])
             post_values = self.rfile.read(length).decode()
             post_values = json.loads(post_values)
+            log.info(post_values)
         else:
+            log.error("not json data which received")
             self.send_error(415, "Only json data is supported.")
             return
         msg_return = self.gen_msg(post_values)
@@ -62,9 +64,12 @@ class TodoHandler(BaseHTTPRequestHandler):
     def gen_msg(self, post_body):
         try:
             method = ''.join((post_body.get("method")))
+            log.debug('method is {}'.format(method))
             data = post_body.get("data")
+            log.debug('data is {}'.format(data))
         except:
-            print(sys.exc_info())
+            log.error(sys.exc_info())
+            # print(sys.exc_info())
             return (False, 400, json.dumps({"error": "can not understand this method"}))
         if method_dic.get(method):
             try:
@@ -77,6 +82,7 @@ class TodoHandler(BaseHTTPRequestHandler):
                 else:
                     return(True,500,return_data)
         else:
+            log.error('can not understand this method')
             return (False, 400, json.dumps({"error": "can not understand this method"}))
 
 class ThreadingServer(ThreadingMixIn, HTTPServer):
