@@ -9,16 +9,16 @@ import sys
 from control_center import Control
 
 def get_info(data):
-    return_msg = Control().get_info()
+    return_msg = control.get_info()
     return return_msg 
 
 
 def run_case(data):
-    return_msg = Control().run_case(data)
+    return_msg = control.run_case(data)
     return return_msg
 
 def get_case_info(data):
-    return_msg = Control().get_case_info(data)
+    return_msg = control.get_case_info(data)
     return return_msg
 
 
@@ -83,8 +83,9 @@ class ThreadingServer(ThreadingMixIn, HTTPServer):
     pass
 
 if __name__ == '__main__':
+    control = Control()
     # global_config = GlobalConfig()
-    host, port = Control().get_server_config()
+    host, port = control.get_server_config()
 
     # Single thread
     server = HTTPServer((host, port), TodoHandler)
