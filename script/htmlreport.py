@@ -6,6 +6,7 @@ from pyh import *
 import time
 import os
 
+
 class HtmlReport:
     def __init__(self, cursor, log, archive_id, run_mode, run_case_list):
         self.title = 'test_report_page'   # 网页标签名称
@@ -76,10 +77,10 @@ class HtmlReport:
                        + td('http method', bgcolor='#ABABAB', align='center')
                        + td('interface name', bgcolor='#ABABAB', align='center')
                        + td('description', bgcolor='#ABABAB', align='center')
-                       + td('apply data', bgcolor='#ABABAB', align='center')
-                       + td('except return', bgcolor='#ABABAB', align='center')
-                       + td('acture return', bgcolor='#ABABAB', align='center')
-                       + td('acture response', bgcolor='#ABABAB', align='center')
+                       + td('apply data', bgcolor='#ABABAB')
+                       + td('except return', bgcolor='#ABABAB')
+                       + td('acture return', bgcolor='#ABABAB')
+                       + td('acture response', bgcolor='#ABABAB')
                        + td('test method', bgcolor='#ABABAB', align='center')
                        + td('result', bgcolor='#ABABAB', align='center')
                        + td('remarks', bgcolor='#ABABAB', align='center'))

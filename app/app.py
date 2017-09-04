@@ -36,13 +36,32 @@ class TodoHandler(BaseHTTPRequestHandler):
             log.info(self.path)
             html_path = '../html/{}'.format(self.path.split('/')[1])
             log.info(html_path)
-            with open(html_path, 'rb') as f:
-                self.send_response(200)
-                response_mesg = f.read()
-                self.send_header('Content-type', 'text/html; charset=utf-8')
-                self.send_header('Content-Length', len(response_mesg))
-                self.end_headers()
-                self.wfile.write(response_mesg)
+            try:
+                with open(html_path, 'rb') as f:
+                    self.send_response(200)
+                    response_mesg = f.read()
+                    self.send_header('Content-type', 'text/html; charset=utf-8')
+                    self.send_header('Content-Length', len(response_mesg))
+                    self.end_headers()
+                    self.wfile.write(response_mesg)
+                    return
+            except:
+                log.error(sys.exc_info())
+                self.send_error(404, "File not found.")
+                return
+        elif self.path == '/favicon.ico':
+            try:
+                with open('../html/favicon.png', 'rb') as f:
+                    self.send_response(200)
+                    response_mesg = f.read()
+                    self.send_header('Content-type', 'image/x-icon')
+                    self.send_header('Content-Length', len(response_mesg))
+                    self.end_headers()
+                    self.wfile.write(response_mesg)
+                    return
+            except:
+                log.error(sys.exc_info())
+                self.send_error(404, "File not found.")
                 return
         parse_path = urllib.parse.urlparse(self.path)
         query_dic = urllib.parse.parse_qs(parse_path.query, True)
@@ -124,5 +143,5 @@ if __name__ == '__main__':
         log.info('quit with <Ctrl-C>')
         print('<Ctrl-C>')
     except:
-        log.info('quit with unknown error')
+        log.info('quit with error:{}'.format(sys.exc_info()))
         print('unknown error')
