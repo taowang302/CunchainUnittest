@@ -11,10 +11,9 @@ import sys
 #import MultipartPostHandler
 
 class ConfigHttp:
-
-    def __init__(self, db_cursor,log,archive_id):
+    def __init__(self, db, log, archive_id):
         #config = configparser.ConfigParser()
-        self.db_cursor = db_cursor.cursor()
+        self.db = db
         self.log = log
         try:
             self.host,self.port=self.get_config(archive_id)[0][:]
@@ -29,9 +28,9 @@ class ConfigHttp:
         urllib.request.install_opener(opener)
 
     def get_config(self,archive_id):
-        self.db_cursor.execute("select host,port from file_bag where file_number='{}'".format(archive_id))
-        http_config_list = self.db_cursor.fetchall()[:]
-        self.db_cursor.close()
+        db_cursor = self.db.run_sql("select host,port from file_bag where file_number='{}'".format(archive_id))
+        http_config_list = db_cursor.fetchall()[:]
+        db_cursor.close()
         self.log.info(http_config_list)
         return http_config_list
 

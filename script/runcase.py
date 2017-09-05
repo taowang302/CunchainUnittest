@@ -15,8 +15,9 @@ class  RunCase:
         pass
 
     def run_case(self, runner, run_mode, run_case_list, db_conn, http, log, archive_id):
-        db_cursor = db_conn.cursor()
-        db_cursor.execute("SELECT COUNT(file_number)  FROM file_bag where file_number='{}'".format(archive_id))
+        # db_cursor = db_conn.cursor()
+        db_cursor = db_conn.run_sql(
+            "SELECT COUNT(file_number)  FROM file_bag where file_number='{}'".format(archive_id))
         archive_num = db_cursor.fetchone()[0]
         # db_cursor.close()
         if int(archive_num) != 1:
@@ -24,22 +25,22 @@ class  RunCase:
             raise ValueError("Wrong archive id :[{}]".format(archive_id))
             return
         else:
-            db_cursor.execute(
+            db_conn.run_sql(
                 "UPDATE test_result set actual_response=NULL ,result=NULL,description=Null,actual_response_code=Null where from_view_id='{}'".format(
                     archive_id))
-            db_cursor.execute('commit')
-            db_cursor.close()
+            db_conn.run_sql('commit')
+            # db_cursor.close()
         global test_data
         if 1 == run_mode:
-            db_cursor = db_conn.cursor()
-            db_cursor.execute("SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(archive_id))
+            # db_cursor = db_conn.cursor()
+            db_cursor = db_conn.run_sql(
+                "SELECT COUNT(case_number)  FROM usercase where from_view_id='{}'".format(archive_id))
             test_case_num = db_cursor.fetchone()[0]
             db_cursor.close()
-
             for case_id in range(1, test_case_num+1):
-                db_cursor = db_conn.cursor()
+                # db_cursor = db_conn.cursor()
                 # db2_cursor = db2_conn.cursor()
-                db_cursor.execute(
+                db_cursor = db_conn.run_sql(
                     'select t.case_name,t.http_method,t.queryparameters,f.host,r.except_response_code,r.except_response,t.test_method from usercase t,file_bag f,test_result r where f.file_number="{}" and t.case_number={} and r.from_view_id=f.file_number and f.file_number=t.from_view_id'.format(
                         archive_id, case_id))
                 tmp_result = db_cursor.fetchall()[:]
@@ -63,9 +64,9 @@ class  RunCase:
                 db_cursor.close()
         elif 0 == run_mode:  
             for case_id in run_case_list:
-                db_cursor = db_conn.cursor()
+                # db_cursor = db_conn.cursor()
                 #db2_cursor = db2_conn.cursor()
-                db_cursor.execute(
+                db_cursor = db_conn.run_sql(
                     'select t.case_name,t.http_method,t.queryparameters,f.host,r.except_response_code,r.except_response,t.test_method from usercase t,file_bag f,test_result r where f.file_number="{}" and t.case_number={} and r.from_view_id=f.file_number and f.file_number=t.from_view_id'.format(
                         archive_id, case_id))
                 tmp_result = db_cursor.fetchall()[:]

@@ -8,7 +8,7 @@ import os
 
 
 class HtmlReport:
-    def __init__(self, cursor, log, archive_id, run_mode, run_case_list):
+    def __init__(self, db, log, archive_id, run_mode, run_case_list):
         self.title = 'test_report_page'   # 网页标签名称
         self.filename = ''                   # 结果文件名
         self.time_took = '00:00:00'         # 测试耗时
@@ -16,7 +16,7 @@ class HtmlReport:
         self.fail_num = 0                     # 测试失败的用例数
         self.error_num = 0                    # 运行出错的用例数
         self.case_total = 0                   # 运行测试用例总数
-        self.cursor = cursor
+        self.db = db
         self.log = log
         self.archive_id = archive_id
         self.run_mode = run_mode
@@ -35,37 +35,37 @@ class HtmlReport:
             if self.run_mode == 0:
                 self.case_total = len(self.run_case_list)
             else:
-                self.cursor.execute(query)
-                self.case_total = self.cursor.fetchone()[0]
+                cursor = self.db.run_sql(query)
+                self.case_total = cursor.fetchone()[0]
 
             # 查询测试失败的用例数
             if 0 == self.run_mode:
                 if 1 == len(self.run_case_list):
                     self.run_case_list.append(-1)
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number in {}'.format('Fail', self.archive_id, tuple(self.run_case_list)))
             else:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Fail',self.archive_id))
-            self.fail_num = self.cursor.fetchone()[0]
+            self.fail_num = cursor.fetchone()[0]
 
             # 查询测试通过的用例数
             if 0 == self.run_mode:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number  in {}'.format('Pass', self.archive_id, tuple(self.run_case_list)))
             else:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Pass',self.archive_id))
-            self.success_num = self.cursor.fetchone()[0]
+            self.success_num = cursor.fetchone()[0]
 
             # 查询测试出错的用例数
             if 0 == self.run_mode:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}" and case_number in {}'.format('Error', self.archive_id, tuple(self.run_case_list)))
             else:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     'SELECT count(case_number) FROM test_result WHERE result = "{}" and from_view_id="{}"'.format('Error',self.archive_id))
-            self.error_num = self.cursor.fetchone()[0]
+            self.error_num = cursor.fetchone()[0]
             self.log.info("total:{}; sucess:{}; failed:{}; error:{}".format(self.case_total,self.success_num,self.fail_num,self.error_num))
             page << p('测试用例数：' + str(self.case_total) + '&nbsp'*10 + '成功用例数：' + str(self.success_num) +
                       '&nbsp'*10 + '失败用例数：' + str(self.fail_num) + '&nbsp'*10 +  '出错用例数：' + str(self.error_num))
@@ -85,15 +85,15 @@ class HtmlReport:
                        + td('result', bgcolor='#ABABAB', align='center')
                        + td('remarks', bgcolor='#ABABAB', align='center'))
             if self.run_mode == 0:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     "select u.case_number,u.http_method,u.case_name,u.description,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,t.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number and t.case_number in {}".format(
                         self.archive_id, tuple(self.run_case_list)))
             else:
-                self.cursor.execute(
+                cursor = self.db.run_sql(
                     "select u.case_number,u.http_method,u.case_name,u.description,u.queryparameters,t.except_response_code,t.actual_response_code,t.actual_response,u.test_method,t.result,t.description from usercase u,test_result t, file_bag f where f.file_number='{}' and u.from_view_id=f.file_number and f.file_number=t.from_view_id and t.case_number=u.case_number".format(
                         self.archive_id))
             #self.cursor.execute(query)
-            query_result = self.cursor.fetchall()
+            query_result = cursor.fetchall()
             for row in query_result:
                 tab1 << tr(td((row[0]), align='center')
                            + td(row[1])
@@ -117,8 +117,8 @@ class HtmlReport:
                 #self.cursor.execute('commit')
             except Exception as e:
                 print('%s' % e)
-                self.cursor.execute('rollback')
-            self.cursor.close()
+                cursor.execute('rollback')
+                cursor.close()
 
     def _set_result_filename(self, filename):
         self.filename = filename

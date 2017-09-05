@@ -53,8 +53,8 @@ def config_db_log(config):
     logger = logging.getLogger('debugdblog')
     logger.setLevel(logging.DEBUG)
     # 创建一个用于sql打印的日志线程
-    # fh = logging.FileHandler(config.get('log_path'))
-    fh = logging.StreamHandler()
+    fh = logging.FileHandler(config.get('log_path'))
+    # fh = logging.StreamHandler()
     # print(config.get('debug_db_log'))
     if 'TRUE' == config.get('debug_db_log').upper():
         fh.setLevel(logging.DEBUG)
@@ -63,6 +63,15 @@ def config_db_log(config):
     formatter = logging.Formatter(
         "[%(asctime)s] [debugdb] %(levelname)s [TD%(thread)d] %(message)s",
         datefmt='%F %T')
+    if 'TRUE' == config.get('console_log').upper():
+        ch = logging.StreamHandler()
+        if 'TRUE' == config.get('debug_db_log').upper():
+            ch.setLevel(logging.DEBUG)
+        else:
+            ch.setLevel(logging.WARNING)
+        ch.setFormatter(formatter)
+        # 给logger添加handler
+        logger.addHandler(ch)
     fh.setFormatter(formatter)
     logger.addHandler(fh)
     return logger

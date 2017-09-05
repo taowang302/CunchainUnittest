@@ -14,8 +14,9 @@ class GlobalConfig():
         self.config_dic = {}
         self.read_config()
         self.log = configlog.config_log(self.config_dic.get("LOG"))
+        self.db_log = configlog.config_db_log(self.config_dic.get("LOG"))
         self.debug_config()
-        self.db = GetDB(self.config_dic.get('DATABASE'), self.log)
+        self.db = GetDB(self.config_dic.get('DATABASE'), self.log, self.db_log)
         self.run_mode_config = ConfigRunMode(self.config_dic.get("RUNCASECONFIG"))
 
     def read_config(self):
@@ -35,13 +36,13 @@ class GlobalConfig():
         return self.log
 
     def get_http(self, archive_id):
-        return ConfigHttp(self.db.get_conn(), self.log, archive_id)
+        return ConfigHttp(self.db, self.log, archive_id)
 
     def get_output_dir(self):
         return self.run_mode_config.get_output_dir()
 
     def get_db_conn(self):
-        return self.db.get_conn()
+        return self.db
 
     def get_run_mode(self):
         return self.run_mode_config.get_run_mode()
