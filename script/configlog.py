@@ -23,9 +23,10 @@ def config_log(config):
                  "CRITICAL": logging.CRITICAL,
                  "WARNING": logging.WARNING}
     log_level = config.get("log_level")
-    log_level = log_level.upper()
+    log_level = level_dic.get(log_level.upper())
+    # log_level = log_level.upper()
     # 创建一个logger
-    logger = logging.getLogger()
+    logger = logging.getLogger('runlog')
     logger.setLevel(log_level)
     # 定义handler的输出格式
     formatter = logging.Formatter(
@@ -48,7 +49,32 @@ def config_log(config):
     return logger
 
 
+def config_db_log(config):
+    logger = logging.getLogger('debugdblog')
+    logger.setLevel(logging.DEBUG)
+    # 创建一个用于sql打印的日志线程
+    # fh = logging.FileHandler(config.get('log_path'))
+    fh = logging.StreamHandler()
+    # print(config.get('debug_db_log'))
+    if 'TRUE' == config.get('debug_db_log').upper():
+        fh.setLevel(logging.DEBUG)
+    else:
+        fh.setLevel(logging.WARNING)
+    formatter = logging.Formatter(
+        "[%(asctime)s] [debugdb] %(levelname)s [TD%(thread)d] %(message)s",
+        datefmt='%F %T')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    return logger
+
+
 if __name__ == '__main__':
+    dblog = config_db_log({
+        "log_level": "debug",
+        "debug_db_log": "true",
+        "log_path": "../log/unittest.log",
+        "console_log": 'true'
+    })
     log = config_log({
         "log_level": "debug",
         "debug_db_log": "true",
@@ -56,4 +82,5 @@ if __name__ == '__main__':
         "console_log": 'true'
     })
 
-    log.info('test')
+    log.info('test for runlog')
+    dblog.info('test for dbebug db log')
