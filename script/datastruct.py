@@ -15,6 +15,5 @@ class DataStruct:
         self.test_desc = ''  # 测试(用例)描述
         self.result = ''       #测试结果
         self.reason = ''       #失败原因
-
-
-
+        self.except_code = ''  # 预期返回code
+        self.except_response = ''  #预期返回报文
