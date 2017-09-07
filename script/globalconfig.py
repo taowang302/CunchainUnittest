@@ -24,7 +24,6 @@ class GlobalConfig():
         config.read('../conf/global_config.ini')
         for section in config.sections():
             self.config_dic[section] = dict(config.items(section))
-            # print(json.dumps(self.config_dic, indent=4, sort_keys=False, ensure_ascii=False))
 
     def debug_config(self):
         if self.config_dic.get('LOG').get('log_level').upper() == 'DEBUG':
@@ -58,7 +57,6 @@ class GlobalConfig():
 
     def clear(self):
         self.db.get_conn().close()
-        # self.db2.get_conn().close()
 
 
 

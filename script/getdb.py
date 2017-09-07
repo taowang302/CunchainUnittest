@@ -35,6 +35,17 @@ class GetDB:
         db_cursor.execute(sql)
         return db_cursor
 
+    def insert_values(self, sql):
+        self.db_log.debug(sql)
+        db_cursor = self.conn.cursor()
+        try:
+            db_cursor.execute(sql)
+        except:
+            self.log.error(sys.exc_info()[1])
+            db_cursor.execute("rollback")
+        else:
+            db_cursor.execute('commit')
+
 
 if __name__ == "__main__":
     import configlog
