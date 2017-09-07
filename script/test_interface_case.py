@@ -2,12 +2,12 @@
 # -*- coding:utf-8 -*-
 
 
-import  unittest
+import unittest
 import json
 import os
 import sys
 import string
-from random import randint,choice
+from random import randint, choice
 
 class ParametrizedTestCase(unittest.TestCase):
     """ TestCase classes that want to be parametrized should
@@ -15,7 +15,7 @@ class ParametrizedTestCase(unittest.TestCase):
     """
 
     def __init__(self, methodName='runTest', test_data=None, http=None, db_cursor=None, db2_cursor=None, log=None,
-                 archive_id=None):
+                 archive_id=None, view_id=None):
         super(ParametrizedTestCase, self).__init__(methodName)
         self.test_data = test_data
         self.http = http
@@ -23,6 +23,7 @@ class ParametrizedTestCase(unittest.TestCase):
         self.db2_cursor = db2_cursor
         self.log = log
         self.archive_id = archive_id
+        self.view_id = view_id
 
 
 class TestInterfaceCase(ParametrizedTestCase):
@@ -47,36 +48,36 @@ class TestInterfaceCase(ParametrizedTestCase):
             response = json.dumps(response).replace("'","\\'")
        try:
             self.log.debug("++++++++++++++++++\n result => {}\n case_id => {}\n++++++++++++++++++".format(self.test_data.result, self.test_data.case_id))
-            self.db_cursor.execute(
+            self.db_cursor.runsql(
                 'UPDATE test_result SET result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                     self.test_data.result, self.test_data.case_id, self.archive_id))
-            self.db_cursor.execute('commit')
+            self.db_cursor.runsql('commit')
        except Exception as e:
             self.log.error('------\n{}'.format(e))
-            self.db_cursor.execute('rollback')
+            self.db_cursor.runsql('rollback')
        except :
             self.log.error(sys.exc_info()[1])
        try:
             self.log.debug(response)
             # self.log.debug('UPDATE test_result SET actual_response="{}" where case_number={}'.format(json.dumps(response),self.test_data.case_id))
-            self.db_cursor.execute(
+            self.db_cursor.runsql(
                 "UPDATE test_result SET actual_response_code={} where case_number={} and from_view_id = '{}'".format(response_code, self.test_data.case_id, self.archive_id))
             if 'Error' == self.test_data.result:
-                self.db_cursor.execute(
+                self.db_cursor.runsql(
                 "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(response, self.test_data.case_id, self.archive_id))
             else:
-                self.db_cursor.execute(
+                self.db_cursor.runsql(
                 "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(response, self.test_data.case_id, self.archive_id))
-            self.db_cursor.execute('commit')
+            self.db_cursor.runsql('commit')
        except Exception as e:
            self.log.error(e)
        return
 
    def test_pay_wx_check(self):
-       self.db_cursor.execute(
+       db_cursor = self.db_cursor.runsql(
            "select t.result,t.actual_response from test_result t, usercase u where u.case_name='/api/v0/pay_wx/create' and t.case_number = u.case_number and t.from_view_id=u.from_view_id and u.from_view_id='{}' ".format(
                self.archive_id))
-       tmp_result = self.db_cursor.fetchall()[:]
+       tmp_result = db_cursor.fetchall()[:]
        self.log.info(tmp_result)
        case_result = tmp_result[0][0]
        case_response = tmp_result[0][1]
@@ -101,28 +102,28 @@ class TestInterfaceCase(ParametrizedTestCase):
            self.log.error("can not find order number")
            response_code='000'
            response=json.loads('{}')
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET description = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                    "Can not find a valid order number", self.test_data.case_id, self.archive_id))
        try:
            self.log.debug(type(response))
            self.log.info(response)
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                    self.test_data.result, self.test_data.case_id, self.archive_id))
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                "UPDATE test_result SET actual_response_code={} where case_number={} and from_view_id = '{}'".format(
                    response_code, self.test_data.case_id, self.archive_id))
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                    json.dumps(response), self.test_data.case_id, self.archive_id))
-           self.db_cursor.execute('commit')
+           self.db_cursor.runsql('commit')
        except Exception as e:
                 self.log.error('%s' % e)
        return
 
    def test_qr_image(self):
-       self.db_cursor.execute(
+       self.db_cursor.runsql(
            "select t.result,t.actual_response from test_result t, usercase u where u.case_name='/api/v0/pay_wx/create' and t.case_number = u.case_number and u.from_view_id='{}' and u.from_view_id=t.from_view_id".format(
                self.archive_id))
        tmp_result = self.db_cursor.fetchall()[:]
@@ -149,34 +150,36 @@ class TestInterfaceCase(ParametrizedTestCase):
                else:
                    self.test_data.result = 'Fail'
            try:
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                        self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                if "Error" != self.test_data.result:
-                   self.db_cursor.execute(
+                   self.db_cursor.runsql(
                        "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                        json.dumps(response), self.test_data.case_id, self.archive_id))
                else:
-                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+                   self.db_cursor.runsql(
+                       "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                           self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error(sys.exc_info[1])
            return
        else:
            self.log.error("can not find order number")
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET actual_response_code = "000",result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format("Fail",
                                                                                                             self.test_data.case_id,
                                                                                                             self.archive_id))
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET description = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                    "Can not find a valid order number", self.test_data.case_id, self.archive_id))
-           self.db_cursor.execute('commit')
+           self.db_cursor.runsql('commit')
        return
 
    def test_sms_normal(self):
        self.log.info(self.test_data.request_param)
-       self.db_cursor.execute(
+       self.db_cursor.runsql(
            "select t.result,t.actual_response from test_result t, usercase u where u.case_name='/api/v0/captcha/image' and t.case_number = u.case_number and u.from_view_id='{}' and u.from_view_id=t.from_view_id".format(
                self.archive_id))
        tmp_result = self.db_cursor.fetchall()[:]
@@ -206,29 +209,33 @@ class TestInterfaceCase(ParametrizedTestCase):
                else:
                    self.test_data.result = 'Fail'
            try:
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE usercase SET queryparameters = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                         self.test_data.request_param, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                        self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                if "Error" != self.test_data.result:
-                   self.db_cursor.execute(
+                   self.db_cursor.runsql(
                        "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                        json.dumps(response), self.test_data.case_id, self.archive_id))
                else:
-                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+                   self.db_cursor.runsql(
+                       "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                           self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error(sys.exc_info[1])
            return
        else:
            self.log.error("can not find valid captcha_image")
            try:
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "Error",actual_response_code = "000" WHERE case_number = {} and from_view_id = "{}"'.format(self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format("can not find order valid captcha_image message", self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+               self.db_cursor.runsql(
+                   "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                       "can not find order valid captcha_image message", self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error(sys.exc_info[1])
           
@@ -236,10 +243,10 @@ class TestInterfaceCase(ParametrizedTestCase):
 
    def test_register_normal(self):
        self.log.info(self.test_data.request_param)
-       self.db_cursor.execute(
+       db_cursor = self.db_cursor.runsql(
            "select t.result,t.actual_response,queryparameters from test_result t, usercase u where u.case_name='/api/v0/captcha/sms' and t.case_number = u.case_number and u.from_view_id='{}' and u.from_view_id=t.from_view_id".format(
                self.archive_id))
-       tmp_result = self.db_cursor.fetchall()[:]
+       tmp_result = db_cursor.fetchall()[:]
        self.log.info(tmp_result)
        case_result = tmp_result[0][0]
        case_response = tmp_result[0][1]
@@ -265,29 +272,33 @@ class TestInterfaceCase(ParametrizedTestCase):
                else:
                    self.test_data.result = 'Fail'
            try:
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE usercase SET queryparameters = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                         self.test_data.request_param, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "{}",actual_response_code = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                        self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
                if "Error" != self.test_data.result:
-                   self.db_cursor.execute(
+                   self.db_cursor.runsql(
                        "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                        json.dumps(response), self.test_data.case_id, self.archive_id))
                else:
-                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+                   self.db_cursor.runsql(
+                       "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                           self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error(sys.exc_info[1])
            return
        else:
            self.log.error("can not find order sms message")
            try:
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "Error",actual_response_code = "000" WHERE case_number = {} and from_view_id = "{}"'.format(self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format("can not find order sms message", self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+               self.db_cursor.runsql(
+                   "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                       "can not find order sms message", self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error(sys.exc_info[1])
 
@@ -314,25 +325,27 @@ class TestInterfaceCase(ParametrizedTestCase):
                    self.test_data.result = 'Error'
            try:
                self.log.debug("++++++++++++++++++\n result => {}\n case_id => {}\n++++++++++++++++++".format(self.test_data.result,self.test_data.case_id))
-               self.db_cursor.execute(
+               self.db_cursor.runsql(
                    'UPDATE test_result SET result = "{}",actual_response_code={} WHERE case_number = {} and from_view_id = "{}"'.format(
                        self.test_data.result, response_code,self.test_data.case_id, self.archive_id))
                if "Error" != self.test_data.result:
-                   self.db_cursor.execute(
+                   self.db_cursor.runsql(
                        "UPDATE test_result SET actual_response='{}' where case_number={} and from_view_id = '{}' ".format(
                        json.dumps(response), self.test_data.case_id, self.archive_id))
                else:
-                   self.db_cursor.execute( "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
-               self.db_cursor.execute('commit')
+                   self.db_cursor.runsql(
+                       "UPDATE test_result SET description='{}' where case_number={} and from_view_id = '{}' ".format(
+                           self.test_data.result, response_code, self.test_data.case_id, self.archive_id))
+               self.db_cursor.runsql('commit')
            except:
                self.log.error("Found err:{}".format(sys_exc_info()[1]))
        else:
            slef.log.error("Upload file do not found:{}".format(img_path))
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET result = "{}" WHERE case_number = {} and from_view_id = "{}"'.format("Error",
                                                                                                             self.test_data.case_id,
                                                                                                             self.archive_id))
-           self.db_cursor.execute(
+           self.db_cursor.runsql(
                'UPDATE test_result SET description = "{}" WHERE case_number = {} and from_view_id = "{}"'.format(
                    "Not found the image", self.test_data.case_id, self.archive_id))
        return
@@ -343,15 +356,17 @@ class TestInterfaceCase(ParametrizedTestCase):
        if {} == response:
             self.test_data.result = 'Error'
             try:
-                self.cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s', (self.test_data.result, self.test_data.case_id))
-                self.cursor.execute('commit')
+                self.cursor.runsql('UPDATE test_result SET result = %s WHERE case_id = %s',
+                                   (self.test_data.result, self.test_data.case_id))
+                self.cursor.runsql('commit')
             except Exception as e:
                 print('%s' % e)
-                self.cursor.execute('rollback')
+                self.cursor.runsql('rollback')
             return
 
        try:
-           self.db2_cursor.execute('SELECT user_id FROM 1dcq_user WHERE mobile = %s',(eval(self.test_data.request_param)['mobile'],))
+           db2_cursor = self.db2_cursor.runsql('SELECT user_id FROM 1dcq_user WHERE mobile = %s',
+                                               (eval(self.test_data.request_param)['mobile'],))
            user_id = self.db2_cursor.fetchone()[0]
            self.db2_cursor.close()
            self.assertEqual(response['code'], 0, msg='返回code不等于0')
@@ -372,20 +387,20 @@ class TestInterfaceCase(ParametrizedTestCase):
            self.test_data.reason = '%s' % e # 记录失败原因
 
        try:
-           self.db_cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s',
-                                  (self.test_data.result, self.test_data.case_id))
-           self.db_cursor.execute('UPDATE test_result SET reason = %s WHERE case_id = %s',
-                                  (self.test_data.reason, self.test_data.case_id))
-           self.db_cursor.execute('commit')
+           self.db_cursor.runsql('UPDATE test_result SET result = %s WHERE case_id = %s',
+                                 (self.test_data.result, self.test_data.case_id))
+           self.db_cursor.runsql('UPDATE test_result SET reason = %s WHERE case_id = %s',
+                                 (self.test_data.reason, self.test_data.case_id))
+           self.db_cursor.runsql('commit')
        except Exception as e:
            print('%s' % e)
-           self.db_cursor.execute('rollback')
+           self.db_cursor.runsql('rollback')
 
    def test_chpasswd_normal(self):
        header = {'Content-Type':'application/json','charset':'utf-8'}
        self.http.set_header(header)
-       self.db_cursor.execute('SELECT request_url, request_param FROM pre_condition_data WHERE case_id = %s and step=1',
-                              (self.test_data.case_id,))
+       self.db_cursor.runsql('SELECT request_url, request_param FROM pre_condition_data WHERE case_id = %s and step=1',
+                             (self.test_data.case_id,))
        temp_result = self.db_cursor.fetchone()
        request_url = temp_result[0]
        request_param = temp_result[1]
@@ -403,12 +418,12 @@ class TestInterfaceCase(ParametrizedTestCase):
        if {} == response:
             self.test_data.result = 'Error'
             try:
-                self.db_cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s',
-                                       (self.test_data.result, self.test_data.case_id))
-                self.db_cursor.execute('commit')
+                self.db_cursor.runsql('UPDATE test_result SET result = %s WHERE case_id = %s',
+                                      (self.test_data.result, self.test_data.case_id))
+                self.db_cursor.runsql('commit')
             except Exception as e:
                 print('%s' % e)
-                self.db_cursor.execute('rollback')
+                self.db_cursor.runsql('rollback')
             return
        try:
            self.assertEqual(response['code'], 0, msg='返回code不等于0')
@@ -421,16 +436,16 @@ class TestInterfaceCase(ParametrizedTestCase):
            self.test_data.reason = '%s' % e  # 记录失败原因
 
        try:
-           self.db_cursor.execute('UPDATE test_result SET request_param = %s WHERE case_id = %s',
-                                  (str(self.test_data.request_param), self.test_data.case_id))
-           self.db_cursor.execute('UPDATE test_result SET result = %s WHERE case_id = %s',
-                                  (self.test_data.result, self.test_data.case_id))
-           self.db_cursor.execute('UPDATE test_result SET reason = %s WHERE case_id = %s',
-                                  (self.test_data.reason, self.test_data.case_id))
-           self.db_cursor.execute('commit')
+           self.db_cursor.runsql('UPDATE test_result SET request_param = %s WHERE case_id = %s',
+                                 (str(self.test_data.request_param), self.test_data.case_id))
+           self.db_cursor.runsql('UPDATE test_result SET result = %s WHERE case_id = %s',
+                                 (self.test_data.result, self.test_data.case_id))
+           self.db_cursor.runsql('UPDATE test_result SET reason = %s WHERE case_id = %s',
+                                 (self.test_data.reason, self.test_data.case_id))
+           self.db_cursor.runsql('commit')
        except Exception as e:
            print('%s' % e)
-           self.db_cursor.execute('rollback')
+           self.db_cursor.runsql('rollback')
 
    def tearDown(self):
        pass
