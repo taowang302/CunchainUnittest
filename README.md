@@ -11,7 +11,8 @@ wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
 
 python3 get-pip.py
 
-#安装第三方库
+# 安装第三方库
+
 pip3 install requests
 
 pip3 install ConfigParser
