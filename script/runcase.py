@@ -75,9 +75,9 @@ class  RunCase:
                                       view_id=self.result_view_id))
                 runner.run(test_suite)
                 db_cursor.close()
-                end_time = datetime.datetime.now()
-                self.gen_html(db_conn, log, self.result_view_id, run_mode, run_case_list, end_time - start_time,
-                              output_dir)
+        # end_time = datetime.datetime.now()
+        #         self.gen_html(db_conn, log, self.result_view_id, run_mode, run_case_list, end_time - start_time,
+        #                       output_dir)
         elif 0 == run_mode:  
             for case_id in run_case_list:
                 db_cursor = db_conn.run_sql(
@@ -108,8 +108,8 @@ class  RunCase:
                                       view_id=self.result_view_id))
                 runner.run(test_suite)
                 db_cursor.close()
-                end_time = datetime.datetime.now()
-                self.gen_html(db_conn, log, self.result_view_id, run_mode, run_case_list, end_time - start_time,
-                              output_dir)
         else:
             log.error("load a run mode")
+            return
+        end_time = datetime.datetime.now()
+        self.gen_html(db_conn, log, self.result_view_id, run_mode, run_case_list, end_time - start_time, output_dir)

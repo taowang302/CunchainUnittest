@@ -19,8 +19,11 @@ class ConfigHttp:
             self.host,self.port=self.get_config(archive_id)[0][:]
         except:
             raise ValueError('Wrong archive id')
-        self.headers = {"Content-Type":"application/json"} 
+        self.headers = {"Content-Type": "application/json"}
+        self.cookie = ''
+        self.install_cookies()
 
+    def install_cookies(self):
         #install cookie
         self.cookie = cj = http.cookiejar.CookieJar()
         self.log.debug(cj)
@@ -69,7 +72,8 @@ class ConfigHttp:
                     return ("000",{})
             response = response.read().decode('utf-8')
             json_response = json.loads(response)
-            self.log.info("receive response:\nresponse_code => {}\nresponse => {}\n========================\n".format(response_code,response))
+            self.log.info("receive response:\nresponse_code => {}\nresponse => {}\n========================\n".format(
+                response_code, json_response))
             return (response_code,json_response)
         except Exception as e:
             self.log.error(e)
@@ -85,6 +89,7 @@ class ConfigHttp:
         self.log.info(
             "send message:\n{}".format(json.dumps(json.loads(data), indent=4, sort_keys=False, ensure_ascii=False)))
         data = data.encode('utf-8')
+        self.log.debug(data)
         try:
             request = urllib.request.Request(url, headers=self.headers)
             response = urllib.request.urlopen(request, data)
@@ -113,3 +118,9 @@ class ConfigHttp:
             return ('000',sys.exc_info()[1])
         else:
             return (ret.status_code,ret.text)
+
+    def post_form(self, url, data):
+        url = 'http://' + self.host + ':' + str(self.port) + url
+        ret = requests.post(url, data=eval(data), cookies=self.cookie)
+        self.log.info(ret.text)
+        return (ret.status_code, ret.text)
