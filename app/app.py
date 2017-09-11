@@ -3,11 +3,82 @@ from http.server import HTTPServer
 import cgi
 import json
 from socketserver import ThreadingMixIn
-import  urllib.parse
+import urllib.parse
 import sys
 # from control_center import GlobalConfig
 from control_center import Control
 import re
+
+import os
+import signal
+import subprocess
+
+
+class Daemon(object):
+    def __init__(self, stdin=os.devnull, stdout=os.devnull, stderr=os.devnull, home_dir='.', umask='022', verbose=1):
+        self.stdin = stdin
+        self.stdout = stdout
+        self.stderr = stderr
+        self.home_dir = home_dir
+        self.verbose = verbose
+        self.umask = umask
+        self.daemon_alive = True
+
+    def daemonize(self):
+        try:
+            pid = os.fork()
+            if pid > 0:
+                sys.exit(0)
+        except OSError as e:
+            sys.stderr.write("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.exit(1)
+        os.chdir(self.home_dir)
+        os.setsid()
+        os.umask(self.umask)
+        try:
+            pid = os.fork()
+            if pid > 0:
+                sys.exit(0)
+        except OSError as e:
+            sys.stderr.write(
+                "fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+            sys.exit(1)
+        if sys.platform != 'darwin':
+            sys.stdout.flush()
+            sys.stderr.flush()
+            si = file(self.stdin, 'r')
+            so = file(self.stdout, 'a+')
+            if self.stderr:
+                se = file(self.stderr, 'a+', 0)
+            else:
+                se = so
+            os.dup2(si.fileno(), sys.stdin.fileno())
+            os.dup2(so.fileno(), sys.stdout.fileno())
+            os.dup2(se.fileno(), sys.stderr.fileno())
+
+        def sigtermhandler(signum, frame):
+            self.daemon_alive = False
+            signal.signal(signal.SIGTERM, sigtermhandler)
+            signal.signal(signal.SIGINT, sigtermhandler)
+
+        if self.verbose >= 1:
+            print("Started")
+        pid = str(os.getpid())
+
+    def start(self, command_list):
+        if self.verbose >= 1:
+            print("Starting...")
+        self.daemonize()
+        # self.run(command_list)
+
+    def is_running(self):
+        pid = self.get_pid()
+        print(pid)
+        return pid and os.path.exists('/proc/%d' % pid)
+
+    def run(self, command_list):
+        print(command_list)
+        # subprocess.Popen(command_list)
 
 def get_info(data):
     return_msg = control.get_info()
@@ -137,11 +208,16 @@ if __name__ == '__main__':
         listen_host = '0.0.0.0'
     log.info("Starting server on {}:{}".format(listen_host, port))
     print("Starting server on {}:{}, use <Ctrl-C> to stop".format(listen_host, port))
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        log.info('quit with <Ctrl-C>')
-        print('<Ctrl-C>')
-    except:
-        log.info('quit with error:{}'.format(sys.exc_info()))
-        print('unknown error')
+    if len(sys.argv) == 1:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            log.info('quit with <Ctrl-C>')
+            print('<Ctrl-C>')
+        except:
+            log.info('quit with error:{}'.format(sys.exc_info()))
+            print('unknown error')
+    else:
+        if sys.argv[1] == '-d':
+            demo = Daemon()
+            demo.start(server.serve_forever())
