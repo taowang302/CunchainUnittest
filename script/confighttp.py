@@ -34,7 +34,7 @@ class ConfigHttp:
         db_cursor = self.db.run_sql("select host,port from file_bag where file_number='{}'".format(archive_id))
         http_config_list = db_cursor.fetchall()[:]
         db_cursor.close()
-        self.log.info(http_config_list)
+        self.log.debug(http_config_list)
         return http_config_list
 
     def set_host(self, host):
