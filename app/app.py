@@ -62,12 +62,12 @@ class Daemon(object):
             signal.signal(signal.SIGINT, sigtermhandler)
 
         if self.verbose >= 1:
-            print("Started")
+            print("Server Started")
         pid = str(os.getpid())
 
     def start(self, command_list):
         if self.verbose >= 1:
-            print("Starting...")
+            print("Starting Server...")
         self.daemonize()
         self.run(command_list)
 
@@ -77,7 +77,7 @@ class Daemon(object):
         return pid and os.path.exists('/proc/%d' % pid)
 
     def run(self, command_list):
-        command_list() 
+        command_list()
         # subprocess.Popen(command_list)
 
 def get_info(data):
@@ -196,29 +196,34 @@ if __name__ == '__main__':
     # global_config = GlobalConfig()
     log = control.log
     host, port = control.get_server_config()
+    try:
+        # Single thread
+        server = HTTPServer((host, port), TodoHandler)
 
-    # Single thread
-    server = HTTPServer((host, port), TodoHandler)
-
-    # Multithreading
-    # server = ThreadingServer((host, port), TodoHandler)
+        # Multithreading
+        # server = ThreadingServer((host, port), TodoHandler)
+    except OSError as e:
+        print('OSError: [Errno {}] {}'.format(e.errno, e.strerror))
+        sys.exit()
     if host:
         listen_host = host
     else:
         listen_host = '0.0.0.0'
     log.info("Starting server on {}:{}".format(listen_host, port))
-    print("Starting server on {}:{}, use <Ctrl-C> to stop".format(listen_host, port))
+
     if len(sys.argv) == 1:
         try:
+            print("Starting server on {}:{}, use <Ctrl-C> to stop".format(listen_host, port))
             server.serve_forever()
         except KeyboardInterrupt:
             log.info('quit with <Ctrl-C>')
             print('<Ctrl-C>')
         except:
-            log.info('quit with error:{}'.format(sys.exc_info()))
+            log.error('quit with error:{}'.format(sys.exc_info()))
             print('unknown error')
+
     else:
         if sys.argv[1] == '-d':
-            log.info(sys.argv)
+            log.debug(sys.argv)
             demo = Daemon()
             demo.start(server.serve_forever)
