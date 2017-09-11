@@ -1,0 +1,30 @@
+[2017-09-11 16:52:12] [globalconfig] [32] debug_config DEBUG [TD140736372159424] start init:
+{
+    "DATABASE": {
+        "host": "192.168.15.171",
+        "port": "3306",
+        "user": "root",
+        "passwd": "jbi123456",
+        "db": "unittest",
+        "charset": "utf8"
+    },
+    "RUNCASECONFIG": {
+        "runmode": "0",
+        "case_id": "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,8,4,15,16,17]",
+        "archive_id": "f_001",
+        "output_dir": "../html/report.html"
+    },
+    "LOG": {
+        "log_level": "debug",
+        "debug_db_log": "false",
+        "log_path": "../log/unittest.log",
+        "console_log": "true"
+    },
+    "SERVER": {
+        "ipaddr": "",
+        "listen_port": "8088",
+        "output_dir": "../html/eport.html"
+    }
+}
+[2017-09-11 16:52:17] [app] [212] <module> INFO [TD140736372159424] Starting server on 0.0.0.0:8088
+[2017-09-11 16:52:27] [app] [219] <module> INFO [TD140736372159424] quit with <Ctrl-C>
