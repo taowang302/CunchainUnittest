@@ -15,7 +15,7 @@ import subprocess
 
 
 class Daemon(object):
-    def __init__(self, stdin=os.devnull, stdout=os.devnull, stderr=os.devnull, home_dir='.', umask='022', verbose=1):
+    def __init__(self, stdin=os.devnull, stdout=os.devnull, stderr=os.devnull, home_dir='.', umask=int('022'), verbose=1):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
@@ -46,10 +46,10 @@ class Daemon(object):
         if sys.platform != 'darwin':
             sys.stdout.flush()
             sys.stderr.flush()
-            si = file(self.stdin, 'r')
-            so = file(self.stdout, 'a+')
+            si = open(self.stdin, 'r')
+            so = open(self.stdout, 'ab')
             if self.stderr:
-                se = file(self.stderr, 'a+', 0)
+                se = open(self.stderr, 'ab', 0)
             else:
                 se = so
             os.dup2(si.fileno(), sys.stdin.fileno())
@@ -69,7 +69,7 @@ class Daemon(object):
         if self.verbose >= 1:
             print("Starting...")
         self.daemonize()
-        # self.run(command_list)
+        self.run(command_list)
 
     def is_running(self):
         pid = self.get_pid()
@@ -77,7 +77,7 @@ class Daemon(object):
         return pid and os.path.exists('/proc/%d' % pid)
 
     def run(self, command_list):
-        print(command_list)
+        command_list() 
         # subprocess.Popen(command_list)
 
 def get_info(data):
@@ -219,5 +219,6 @@ if __name__ == '__main__':
             print('unknown error')
     else:
         if sys.argv[1] == '-d':
+            log.info(sys.argv)
             demo = Daemon()
-            demo.start(server.serve_forever())
+            demo.start(server.serve_forever)
