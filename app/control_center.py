@@ -13,6 +13,7 @@ from script.htmlreport import HtmlReport
 import datetime
 import unittest
 from globalconfig import GlobalConfig
+import traceback
 
 
 # class GlobalConfig:
@@ -96,9 +97,11 @@ class Control:
                 data.append({"case id":item[0],"api":item[1],"method":item[2],"description":item[3]})
             return {"status":"success","total":len(archive_info),"data":data}
 
-    def run_case(self, archive_id):
+    def run_case(self, data):
         try:
-            archive_id = ''.join(archive_id)
+            archive_id = ''.join(data.get("archiveid"))
+            case_list = list(data.get("case_list"))
+            self.log.info(case_list)
         except:
             return {"status":"error","data":"".format(sys.exc_info()[1])}
         start_time = datetime.datetime.now()
@@ -107,22 +110,26 @@ class Control:
         try:
             http = ConfigHttp(db_conn, log, archive_id)
         except ValueError as e:
+            self.log(e)
             return {"status":"error","data":"{}".format(e)}
         except:
+            self.log.error(traceback.extract_tb(sys.exc_info()[2]))
             return {"status":"error","data":"{}".format(sys.exc_info()[1])}
         runner = unittest.TextTestRunner()
         try:
-            case_runner = RunCase()
-            case_runner.run_case(runner, 1, [], db_conn, http, log, archive_id)
-            end_time = datetime.datetime.now()
             output_dir = self.global_config.get_output_dir()
-            html_report = HtmlReport(db_conn.cursor(), log, archive_id, 1, [])
-            html_report.set_time_took(str(end_time - start_time))
-            html_report.generate_html('test report', output_dir)
+            case_runner = RunCase()
+            case_runner.run_case(runner, 0, case_list, db_conn, http, log, archive_id, output_dir)
+            # end_time = datetime.datetime.now()
+            # output_dir = self.global_config.get_output_dir()
+            # html_report = HtmlReport(db_conn.cursor(), log, archive_id, 1, [])
+            # html_report.set_time_took(str(end_time - start_time))
+            # html_report.generate_html('test report', output_dir)
         except:
+            self.log.error(traceback.extract_tb(sys.exc_info()[2]))
             return {"status":"error","data":"{}".format(sys.exc_info()[1])}
         else:
-            case_total,success_nu,fail_nu,err_nu,report_url=html_report.get_info()
+            case_total, success_nu, fail_nu, err_nu, report_url = case_runner.get_done_info()
             self.global_config.clear()
             return{"status":"success","data":{"case_total":case_total,"success_nu":success_nu,"fail_nu":fail_nu,"err_nu":err_nu,"report_url":report_url}}
 
