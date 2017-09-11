@@ -15,11 +15,17 @@ class  RunCase:
 
     def __init__(self):
         self.result_view_id = ''
+        self.case_total = ''
+        self.success_num = ''
+        self.error_num = ''
+        self.fail_num = ''
+        self.filename = ''
 
     def gen_html(self, db_conn, log, view_id, run_mode, run_case_list, waste_time, output_dir):
         html_report = HtmlReport(db_conn, log, view_id, run_mode, run_case_list)
         html_report.set_time_took(str(waste_time))
         html_report.generate_html('test report', output_dir)
+        self.case_total, self.success_num, self.error_num, self.fail_num, self.filename = html_report.get_info()
 
     def run_case(self, runner, run_mode, run_case_list, db_conn, http, log, archive_id, output_dir):
         start_time = datetime.datetime.now()
@@ -113,3 +119,6 @@ class  RunCase:
             return
         end_time = datetime.datetime.now()
         self.gen_html(db_conn, log, self.result_view_id, run_mode, run_case_list, end_time - start_time, output_dir)
+
+    def get_done_info(self):
+        return (self.case_total, self.success_num, self.error_num, self.fail_num, self.filename)
