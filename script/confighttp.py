@@ -72,8 +72,8 @@ class ConfigHttp:
                     return ("000",{})
             response = response.read().decode('utf-8')
             json_response = json.loads(response)
-            self.log.info("receive response:\nresponse_code => {}\nresponse => {}\n========================\n".format(
-                response_code, json_response))
+            self.log.info("receive response:\nresponse_code => {}\nresponse => \n{}\n========================\n".format(
+                response_code, json.dumps(json_response, indent=4, sort_keys=False, ensure_ascii=False)))
             return (response_code,json_response)
         except Exception as e:
             self.log.error(e)

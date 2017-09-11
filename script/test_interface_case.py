@@ -60,17 +60,16 @@ class TestInterfaceCase(ParametrizedTestCase):
             "++++++++++++++++++\n result => {}\n case_id => {}\n++++++++++++++++++".format(self.test_data.result,
                                                                                            self.test_data.case_id))
         self.log.debug(type(response))
-        # response = '{}'.format(str(response).replace('"',"'"))
-        self.log.debug(response
-                       )
+        response = '{}'.format(response.replace("'", "\'"))
+        self.log.debug(response)
         self.db_cursor.insert_values(
-            '''insert into test_result (view_id, case_number, queryparameters, actual_response_code, actual_response, result, description) values({},{},"{}",{},"{}",'{}','{}')'''.format(
+            '''insert into test_result (view_id, case_number, queryparameters, actual_response_code, actual_response, result, description) values({},{},"{}",{},'{}','{}','{}')'''.format(
                 self.view_id,
                 self.test_data.case_id,
                 eval(self.test_data.request_param),
                 response_code,
-                # response,
-                json.loads(response),
+                response,
+                # json.loads(response),
                 # str(response.replace("\\","")),
                 self.test_data.result,
                 desc.replace("'", "\\'")
@@ -313,7 +312,8 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.log.error(desc)
         else:
             if 'Pass' == tmp_result[0][0]:
-                user_info = tmp_result[0][1]
+                user_info = tmp_result[0][1].replace('null', 'None').replace('false', 'False')
+                self.log.debug(user_info)
                 self.test_data.request_param = eval(self.test_data.request_param)
                 self.test_data.request_param["number"] = eval(user_info).get("user").get('number')
                 self.test_data.request_param = str(self.test_data.request_param)
@@ -348,7 +348,7 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.log.error(desc)
         else:
             if 'Pass' == tmp_result[0][0]:
-                user_info = tmp_result[0][1]
+                user_info = tmp_result[0][1].replace('null', "None").replace('false', 'False')
                 self.test_data.request_param = eval(user_info).get("user")
                 self.test_data.request_param["authenticated"] = 1
                 self.test_data.request_param = str(self.test_data.request_param)
@@ -383,7 +383,7 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.log.error(desc)
         else:
             if 'Pass' == tmp_result[0][0]:
-                user_info = tmp_result[0][1]
+                user_info = tmp_result[0][1].replace('null', "None").replace('false', 'False')
                 self.test_data.request_param = eval(self.test_data.request_param)
                 self.test_data.request_param["number"] = eval(user_info).get("user").get("number")
                 self.test_data.request_param = str(self.test_data.request_param)
@@ -418,7 +418,7 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.log.error(desc)
         else:
             if 'Pass' == tmp_result[0][0]:
-                user_info = tmp_result[0][1]
+                user_info = tmp_result[0][1].replace('null', "None").replace('false', 'False')
                 self.test_data.request_param = eval(self.test_data.request_param)
                 self.test_data.request_param["number"] = eval(user_info).get("user").get("number")
                 self.test_data.request_param["name"] = eval(user_info).get("user").get("name")
@@ -434,7 +434,42 @@ class TestInterfaceCase(ParametrizedTestCase):
             '''insert into test_result (view_id, case_number, queryparameters, actual_response_code, actual_response, result, description) values({},{},"{}",{},'{}','{}','{}')'''.format(
                 self.view_id,
                 self.test_data.case_id,
-                self.test_data.request_param,
+                eval(self.test_data.request_param),
+                response_code,
+                json.dumps(response),
+                self.test_data.result,
+                desc
+            ))
+
+    def test_entry_op(self):
+        db_cursor = self.db_cursor.run_sql(
+            "select t.result, t.actual_response from usercase u, test_result t where u.case_name = '/api/v0/hash/save' and t.case_number = u.case_number and t.view_id = {}".format(
+                self.view_id))
+        tmp_result = db_cursor.fetchall()[:]
+        self.log.debug('got result {}'.format(tmp_result))
+        if len(tmp_result) == 0:
+            self.test_data.result = 'Fail'
+            response_code, response = ['NULL', {}][:]
+            desc = 'can not find a new entry hash'
+            self.log.error(desc)
+        else:
+            if 'Pass' == tmp_result[0][0]:
+                user_info = tmp_result[0][1].replace('null', "None").replace('false', 'False')
+                self.test_data.request_param = eval(self.test_data.request_param)
+                self.test_data.request_param["entry_hash"] = eval(user_info).get("entry_hash")
+                self.test_data.request_param = str(self.test_data.request_param)
+                self.test_default_normal()
+                return
+            else:
+                self.test_data.result = 'Fail'
+                response_code, response = ('NULL', {})[:]
+                desc = 'can not find a new entry hash'
+                self.log.error(desc)
+        self.db_cursor.insert_values(
+            '''insert into test_result (view_id, case_number, queryparameters, actual_response_code, actual_response, result, description) values({},{},"{}",{},'{}','{}','{}')'''.format(
+                self.view_id,
+                self.test_data.case_id,
+                eval(self.test_data.request_param),
                 response_code,
                 json.dumps(response),
                 self.test_data.result,
