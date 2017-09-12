@@ -100,11 +100,12 @@ method_dic = {"get_info": get_info, "run_case": run_case, "get_case_info":get_ca
 
 class TodoHandler(BaseHTTPRequestHandler):
     def do_GET(self):
+        log.info('receive request GET {}'.format(self.path))
         if self.path == '/':
+            log.error('error request')
             self.send_error(404, "File not found.")
             return
         elif re.match('^/report(.*?)html$', self.path):
-            log.info(self.path)
             html_path = '../html/{}'.format(self.path.split('/')[1])
             log.info(html_path)
             try:
@@ -123,6 +124,7 @@ class TodoHandler(BaseHTTPRequestHandler):
         elif self.path == '/favicon.ico':
             try:
                 with open('../html/favicon.png', 'rb') as f:
+                    log.info('response 200')
                     self.send_response(200)
                     response_mesg = f.read()
                     self.send_header('Content-type', 'image/x-icon')
@@ -131,14 +133,16 @@ class TodoHandler(BaseHTTPRequestHandler):
                     self.wfile.write(response_mesg)
                     return
             except:
-                log.error(sys.exc_info())
+                log.error('response 404 {}'.format(sys.exc_info()))
                 self.send_error(404, "File not found.")
                 return
         parse_path = urllib.parse.urlparse(self.path)
         query_dic = urllib.parse.parse_qs(parse_path.query, True)
         msg_return = self.gen_msg(query_dic)
         self.send_response(msg_return[1])
+        log.info('send response {}'.format(msg_return[1]))
         response_mesg = json.dumps(msg_return[2]).encode(encoding="utf-8")
+        log.debug('send response:\n{}'.format(json.dumps(msg_return[2], indent=4, sort_keys=False, ensure_ascii=False)))
         self.send_header('Content-type', 'application/json')
         self.send_header('Content-Length', len(response_mesg))
         self.end_headers()
@@ -158,7 +162,9 @@ class TodoHandler(BaseHTTPRequestHandler):
             return
         msg_return = self.gen_msg(post_values)
         self.send_response(msg_return[1])
+        log.info('response {}'.format(msg_return[1]))
         response_mesg = json.dumps(msg_return[2]).encode(encoding="utf-8")
+        log.debug('send response:\n{}'.format(json.dumps(msg_return[2], indent=4, sort_keys=False, ensure_ascii=False)))
         self.send_header('Content-type', 'application/json')
         self.send_header('Content-Length', len(response_mesg))
         self.end_headers()

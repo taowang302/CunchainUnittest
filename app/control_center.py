@@ -85,7 +85,7 @@ class Control:
                 return {"status": "error", "data":'Invalid Archive ID'}
         try:
             db_cursor = self.db_conn.run_sql(
-                "SELECT case_number,case_name,http_method,description  FROM usercase where from_view_id='{}'".format(
+                "SELECT case_number,case_name,http_method,description  FROM usercase where from_view_id='{}' order by case_number".format(
                     archive_id))
         except:
             return {"status": "error", "data":'{}'.format(sys.exc_info()[1])}
