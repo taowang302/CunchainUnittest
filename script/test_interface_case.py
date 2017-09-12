@@ -32,9 +32,9 @@ class TestInterfaceCase(ParametrizedTestCase):
     def setUp(self):
         pass
 
-    def test_default_normal(self):
+    def test_default_normal(self, get_png=False):
         if "GET" == self.test_data.http_method:
-            return_msg = self.http.get(self.test_data.request_url, self.test_data.request_param)
+            return_msg = self.http.get(self.test_data.request_url, self.test_data.request_param, get_png)
         elif "POST" == self.test_data.http_method:
             return_msg = self.http.post(self.test_data.request_url, self.test_data.request_param)
             # post data with form
@@ -77,8 +77,8 @@ class TestInterfaceCase(ParametrizedTestCase):
 
     def test_pay_wx_check(self):
         db_cursor = self.db_cursor.run_sql(
-            "select t.result,t.actual_response from test_result t, usercase u where u.case_name='/api/v0/pay_wx/create' and t.case_number = u.case_number and t.from_view_id=u.from_view_id and u.from_view_id='{}' ".format(
-                self.archive_id))
+            "select t.result, t.actual_response from usercase u, test_result t where u.case_name = '/api/v0/pay_wx_create' and t.case_number = u.case_number and t.view_id = {} ".format(
+                self.view_id))
         tmp_result = db_cursor.fetchall()[:]
         self.log.info(tmp_result)
         case_result = tmp_result[0][0]
@@ -88,7 +88,7 @@ class TestInterfaceCase(ParametrizedTestCase):
             self.test_data.request_param = eval(self.test_data.request_param)
             self.test_data.request_param["order_no"] = order_no
             self.test_data.request_param = str(self.test_data.request_param)
-            self.test_default_normal()
+            self.test_default_normal(True)
             return
         else:
             self.test_data.result = 'Fail'
